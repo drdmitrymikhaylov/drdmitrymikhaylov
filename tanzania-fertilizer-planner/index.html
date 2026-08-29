@@ -1,0 +1,1879 @@
+<title>Mbolea Territory Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* ───────────────────────────────────────────────────────────────
+   Mbolea Territory Planner — fertiliser demand & sales territories
+   Coast–Morogoro corridor, Tanzania. ~520 × 510 km window.
+   ─────────────────────────────────────────────────────────────── */
+
+:root{
+  color-scheme: light;
+  --plane:      #eceee7;
+  --panel:      #f7f8f4;
+  --panel-2:    #e3e6db;
+  --panel-3:    #dbdfd0;
+  --ink:        #131711;
+  --ink-2:      #4d5349;
+  --ink-3:      #7d8476;
+  --line:       #d2d7c8;
+  --line-soft:  #e0e4d8;
+  --accent:     #1c5cab;
+  --accent-2:   #2a78d6;
+  --accent-ink: #ffffff;
+  --amber:      #d98505;
+  --amber-mark: #f2a20c;
+  --amber-soft: rgba(242,162,12,.16);
+  --good:       #0ca30c;
+  --good-ink:   #006300;
+  --critical:   #d03b3b;
+  --serious:    #c25f2e;
+
+  /* map */
+  --ocean:      #c9d9dd;
+  --ocean-line: #b0c6ca;
+  --land:       #e7e9dc;
+  --land-edge:  #aab199;
+  --park:       #dde3ce;
+  --park-line:  #b9c4a1;
+  --road:       #b3b8a6;
+  --road-trunk: #9aa08c;
+  --river:      #a8c4cd;
+  --district:   rgba(19,23,17,.22);
+  --grat:       rgba(19,23,17,.07);
+  --town:       #131711;
+  --label-halo: #f2f3ec;
+
+  /* crops — fixed identity hues, never repainted by rank */
+  --c-maize:    #2a78d6;
+  --c-cassava:  #eb6834;
+  --c-rice:     #1baf7a;
+  --c-cane:     #4a3aa7;
+  --c-cashew:   #eda100;
+  --c-sisal:    #008300;
+  --c-sunflow:  #e87ba4;
+  --c-sorghum:  #e34948;
+  --c-hort:     #00807a;
+  --c-other:    #9aa08c;
+
+  --shadow: 0 1px 2px rgba(19,23,17,.06), 0 8px 24px rgba(19,23,17,.07);
+  --radius: 3px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --plane:      #0e120e;
+    --panel:      #171b16;
+    --panel-2:    #1f241d;
+    --panel-3:    #262c24;
+    --ink:        #f1f3ec;
+    --ink-2:      #b6bdaf;
+    --ink-3:      #838a7c;
+    --line:       #2b312a;
+    --line-soft:  #232821;
+    --accent:     #5598e7;
+    --accent-2:   #3987e5;
+    --accent-ink: #06131f;
+    --amber:      #f0aa2c;
+    --amber-mark: #ffb52e;
+    --amber-soft: rgba(255,181,46,.14);
+    --good:       #0ca30c;
+    --good-ink:   #35c035;
+    --critical:   #e66767;
+    --serious:    #ec835a;
+
+    --ocean:      #0a161c;
+    --ocean-line: #17303a;
+    --land:       #212721;
+    --land-edge:  #3e4739;
+    --park:       #1e2a1d;
+    --park-line:  #2f3f2c;
+    --road:       #3b4238;
+    --road-trunk: #545c4f;
+    --river:      #2b4c58;
+    --district:   rgba(241,243,236,.20);
+    --grat:       rgba(241,243,236,.06);
+    --town:       #f1f3ec;
+    --label-halo: #10140f;
+
+    --c-maize:    #3987e5;
+    --c-cassava:  #d95926;
+    --c-rice:     #199e70;
+    --c-cane:     #9085e9;
+    --c-cashew:   #c98500;
+    --c-sisal:    #21a021;
+    --c-sunflow:  #d55181;
+    --c-sorghum:  #e66767;
+    --c-hort:     #16a09a;
+    --c-other:    #6b7263;
+
+    --shadow: 0 1px 2px rgba(0,0,0,.5), 0 10px 30px rgba(0,0,0,.45);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --plane:      #0e120e;
+  --panel:      #171b16;
+  --panel-2:    #1f241d;
+  --panel-3:    #262c24;
+  --ink:        #f1f3ec;
+  --ink-2:      #b6bdaf;
+  --ink-3:      #838a7c;
+  --line:       #2b312a;
+  --line-soft:  #232821;
+  --accent:     #5598e7;
+  --accent-2:   #3987e5;
+  --accent-ink: #06131f;
+  --amber:      #f0aa2c;
+  --amber-mark: #ffb52e;
+  --amber-soft: rgba(255,181,46,.14);
+  --good:       #0ca30c;
+  --good-ink:   #35c035;
+  --critical:   #e66767;
+  --serious:    #ec835a;
+
+  --ocean:      #0a161c;
+  --ocean-line: #17303a;
+  --land:       #212721;
+  --land-edge:  #3e4739;
+  --park:       #1e2a1d;
+  --park-line:  #2f3f2c;
+  --road:       #3b4238;
+  --road-trunk: #545c4f;
+  --river:      #2b4c58;
+  --district:   rgba(241,243,236,.20);
+  --grat:       rgba(241,243,236,.06);
+  --town:       #f1f3ec;
+  --label-halo: #10140f;
+
+  --c-maize:    #3987e5;
+  --c-cassava:  #d95926;
+  --c-rice:     #199e70;
+  --c-cane:     #9085e9;
+  --c-cashew:   #c98500;
+  --c-sisal:    #21a021;
+  --c-sunflow:  #d55181;
+  --c-sorghum:  #e66767;
+  --c-hort:     #16a09a;
+  --c-other:    #6b7263;
+
+  --shadow: 0 1px 2px rgba(0,0,0,.5), 0 10px 30px rgba(0,0,0,.45);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--plane); color:var(--ink);
+  font-family:"IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size:13px; line-height:1.45; -webkit-font-smoothing:antialiased;
+}
+button, input, select{font:inherit; color:inherit}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+/* ── shell ─────────────────────────────────────────────────── */
+.app{display:flex; flex-direction:column; height:100dvh; min-height:600px}
+
+.topbar{
+  display:flex; align-items:center; gap:18px; flex:0 0 auto;
+  padding:0 16px; height:54px; background:var(--panel);
+  border-bottom:1px solid var(--line);
+}
+.brand{display:flex; align-items:baseline; gap:10px; min-width:0}
+.brand h1{
+  margin:0; font-family:"IBM Plex Sans Condensed", "IBM Plex Sans", sans-serif;
+  font-size:19px; font-weight:700; letter-spacing:-.01em; white-space:nowrap;
+}
+.brand .sub{
+  font-family:"IBM Plex Sans Condensed", sans-serif; font-size:12px; color:var(--ink-3);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.topbar .spacer{flex:1}
+.topline{display:flex; align-items:center; gap:22px}
+.topstat{display:flex; flex-direction:column; gap:1px; line-height:1.1}
+.topstat .k{font-family:"IBM Plex Sans Condensed",sans-serif; font-size:10px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3)}
+.topstat .v{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:15px; font-weight:500; font-variant-numeric:tabular-nums}
+.topstat .v small{font-size:10px; color:var(--ink-3); font-weight:400; margin-left:2px}
+
+.body{display:flex; flex:1 1 auto; min-height:0}
+
+.rail{
+  flex:0 0 296px; background:var(--panel); border-right:1px solid var(--line);
+  overflow-y:auto; overscroll-behavior:contain;
+}
+.rail.right{flex-basis:360px; border-right:0; border-left:1px solid var(--line)}
+.rail::-webkit-scrollbar{width:9px}
+.rail::-webkit-scrollbar-thumb{background:var(--line); border-radius:9px}
+
+.stage{flex:1 1 auto; min-width:0; min-height:0; display:flex; flex-direction:column}
+.mapwrap{position:relative; flex:1 1 auto; min-height:0; background:var(--ocean)}
+#map{display:block; width:100%; height:100%; cursor:crosshair; touch-action:none}
+#map:focus-visible{outline:2px solid var(--accent); outline-offset:-2px}
+#map.panning{cursor:grabbing}
+#map.panmode{cursor:grab}
+
+/* ── panel furniture ───────────────────────────────────────── */
+.sect{border-bottom:1px solid var(--line-soft); padding:14px 14px 16px}
+.sect:last-child{border-bottom:0}
+.eyebrow{
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  font-family:"IBM Plex Sans Condensed",sans-serif; font-size:10.5px; font-weight:600;
+  letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin:0 0 10px;
+}
+.eyebrow .note{letter-spacing:0; text-transform:none; font-weight:500; font-size:11px}
+
+.seg{display:flex; background:var(--panel-2); border:1px solid var(--line); border-radius:var(--radius); padding:2px; gap:2px}
+.seg button{
+  flex:1; border:0; background:transparent; border-radius:2px; padding:5px 4px; cursor:pointer;
+  font-family:"IBM Plex Sans Condensed",sans-serif; font-size:11.5px; font-weight:600;
+  letter-spacing:.02em; color:var(--ink-2); white-space:nowrap;
+}
+.seg button:hover{background:var(--panel-3)}
+.seg button[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink)}
+
+.field{margin-top:12px}
+.field:first-child{margin-top:0}
+.field > label{display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:5px}
+.field .lab{font-size:12px; color:var(--ink-2)}
+.field .val{font-family:"IBM Plex Mono",monospace; font-size:12px; font-weight:500; font-variant-numeric:tabular-nums}
+select, input[type="text"], input[type="number"]{
+  width:100%; background:var(--panel-2); border:1px solid var(--line);
+  border-radius:var(--radius); padding:6px 8px; font-size:12.5px;
+}
+input[type="range"]{width:100%; accent-color:var(--accent); height:18px}
+
+.hint{font-size:11.5px; color:var(--ink-3); margin:8px 0 0; line-height:1.4}
+
+/* crop list */
+.croplist{display:flex; flex-direction:column; gap:1px}
+.crop{
+  display:grid; grid-template-columns:14px 1fr auto; align-items:center; gap:8px;
+  padding:5px 6px; border-radius:2px; cursor:pointer; border:0; background:transparent;
+  width:100%; text-align:left; color:inherit;
+}
+.crop:hover{background:var(--panel-2)}
+.crop[data-on="0"]{opacity:.4}
+.crop[data-focus="1"]{background:var(--panel-3); box-shadow:inset 2px 0 0 var(--ink)}
+.sw{width:11px; height:11px; border-radius:2px; background:var(--c-other)}
+.crop .nm{font-size:12.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.crop .qt{font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--ink-2); font-variant-numeric:tabular-nums}
+
+.checks{display:flex; flex-direction:column; gap:6px; margin-top:4px}
+.chk{display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer; color:var(--ink-2)}
+.chk input{accent-color:var(--accent); margin:0}
+
+/* ── map overlays ──────────────────────────────────────────── */
+.ov{position:absolute; z-index:3}
+.ov-tools{top:10px; left:10px; display:flex; gap:6px; flex-wrap:wrap; max-width:calc(100% - 20px)}
+.tool{
+  background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+  padding:5px 9px; cursor:pointer; box-shadow:var(--shadow);
+  font-family:"IBM Plex Sans Condensed",sans-serif; font-size:11.5px; font-weight:600; letter-spacing:.03em;
+  color:var(--ink-2); display:inline-flex; align-items:center; gap:6px;
+}
+.tool:hover{border-color:var(--ink-3)}
+.tool[aria-pressed="true"]{background:var(--ink); color:var(--plane); border-color:var(--ink)}
+.tool.primary{background:var(--amber-mark); border-color:var(--amber); color:#231803}
+.tool.primary:hover{filter:brightness(1.06)}
+
+.ov-zoom{top:10px; right:10px; display:flex; flex-direction:column; gap:5px}
+.ov-zoom .tool{width:30px; height:28px; justify-content:center; padding:0; font-size:14px}
+
+.ov-legend{
+  left:10px; bottom:10px; background:var(--panel); border:1px solid var(--line);
+  border-radius:var(--radius); box-shadow:var(--shadow); padding:9px 11px 10px; min-width:186px;
+}
+.ov-legend .lg-title{
+  font-family:"IBM Plex Sans Condensed",sans-serif; font-size:10.5px; font-weight:600;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); margin-bottom:7px;
+}
+.ramp{height:9px; border-radius:2px; margin-bottom:4px}
+.ramp-ax{display:flex; justify-content:space-between; font-family:"IBM Plex Mono",monospace; font-size:10px; color:var(--ink-3); font-variant-numeric:tabular-nums}
+.lgrow{display:flex; align-items:center; gap:7px; font-size:11.5px; padding:1.5px 0; color:var(--ink-2)}
+.lgrow .sw{width:10px; height:10px; flex:0 0 auto}
+
+.ov-scale{
+  right:10px; bottom:10px; background:var(--panel); border:1px solid var(--line);
+  border-radius:var(--radius); box-shadow:var(--shadow); padding:6px 9px 7px;
+  font-family:"IBM Plex Mono",monospace; font-size:10.5px; color:var(--ink-2);
+  display:flex; flex-direction:column; gap:4px; align-items:flex-start;
+}
+.scalebar{height:5px; border-left:1px solid currentColor; border-right:1px solid currentColor; border-bottom:1px solid currentColor}
+
+#tip{
+  position:absolute; z-index:6; pointer-events:none; background:var(--panel);
+  border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow);
+  padding:8px 10px; min-width:168px; max-width:230px; display:none;
+}
+#tip .t-h{font-family:"IBM Plex Sans Condensed",sans-serif; font-weight:600; font-size:12.5px; margin-bottom:3px}
+#tip .t-r{display:flex; justify-content:space-between; gap:12px; font-size:11.5px; color:var(--ink-2)}
+#tip .t-r b{font-family:"IBM Plex Mono",monospace; font-weight:500; color:var(--ink); font-variant-numeric:tabular-nums}
+#tip .t-crop{display:flex; align-items:center; gap:6px; margin-top:5px; font-size:11.5px; color:var(--ink-2)}
+
+.coach{
+  position:absolute; z-index:5; left:50%; transform:translateX(-50%); top:52px;
+  background:var(--ink); color:var(--plane); border-radius:var(--radius);
+  padding:7px 13px; font-size:12px; box-shadow:var(--shadow); display:flex; gap:9px; align-items:center;
+}
+.coach b{font-family:"IBM Plex Sans Condensed",sans-serif; letter-spacing:.02em}
+.coach button{background:transparent; border:0; color:var(--plane); opacity:.6; cursor:pointer; font-size:15px; line-height:1; padding:0 0 0 4px}
+.coach button:hover{opacity:1}
+
+/* ── territory bench ───────────────────────────────────────── */
+.bench{
+  flex:0 0 auto; background:var(--panel); border-top:1px solid var(--line);
+  padding:8px 12px; display:flex; align-items:center; gap:8px; overflow-x:auto;
+}
+.bench::-webkit-scrollbar{height:7px}
+.bench::-webkit-scrollbar-thumb{background:var(--line); border-radius:7px}
+.terr{
+  flex:0 0 auto; display:flex; align-items:center; gap:9px; cursor:pointer;
+  background:var(--panel-2); border:1px solid var(--line); border-left:3px solid var(--amber-mark);
+  border-radius:var(--radius); padding:5px 8px 5px 8px; color:inherit; text-align:left;
+}
+.terr:hover{border-color:var(--ink-3)}
+.terr[aria-current="true"]{background:var(--panel-3); border-color:var(--ink-3); box-shadow:inset 0 0 0 1px var(--ink-3)}
+.terr .tn{font-family:"IBM Plex Sans Condensed",sans-serif; font-weight:600; font-size:12.5px; white-space:nowrap}
+.terr .tv{font-family:"IBM Plex Mono",monospace; font-size:12px; font-variant-numeric:tabular-nums; color:var(--ink-2)}
+.terr .tx{border:0; background:transparent; color:var(--ink-3); cursor:pointer; font-size:14px; line-height:1; padding:0 1px}
+.terr .tx:hover{color:var(--critical)}
+.bench .empty{font-size:12px; color:var(--ink-3); padding:4px 2px}
+
+/* ── results rail ──────────────────────────────────────────── */
+.hero{padding:14px 14px 15px; border-bottom:1px solid var(--line-soft)}
+.hero .who{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:9px}
+.hero input.name{
+  font-family:"IBM Plex Sans Condensed",sans-serif; font-weight:700; font-size:16px;
+  background:transparent; border:0; border-bottom:1px dashed var(--line); border-radius:0;
+  padding:1px 0; width:auto; flex:1; min-width:0;
+}
+.hero input.name:hover{border-bottom-color:var(--ink-3)}
+.pill{
+  font-family:"IBM Plex Sans Condensed",sans-serif; font-size:10.5px; font-weight:600;
+  letter-spacing:.08em; text-transform:uppercase; padding:3px 7px; border-radius:2px;
+  border:1px solid currentColor; white-space:nowrap;
+}
+.pill.prime{color:var(--good-ink)}
+.pill.viable{color:var(--accent)}
+.pill.thin{color:var(--serious)}
+.figure{display:flex; align-items:baseline; gap:8px}
+.figure .n{font-family:"IBM Plex Mono",monospace; font-size:38px; font-weight:500; letter-spacing:-.02em; line-height:1}
+.figure .u{font-family:"IBM Plex Sans Condensed",sans-serif; font-size:13px; color:var(--ink-2)}
+.figure .d{margin-left:auto; text-align:right; font-size:11px; color:var(--ink-3); line-height:1.3}
+.hero .cap{font-size:11.5px; color:var(--ink-3); margin-top:7px}
+.dia{display:flex; align-items:center; gap:7px; margin-top:11px; flex-wrap:wrap}
+.dia label{font-size:11.5px; color:var(--ink-2)}
+.dia input{width:64px; text-align:right; font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums}
+.dia .u{font-size:11.5px; color:var(--ink-3)}
+.dia .presets{display:flex; gap:3px; margin-left:auto}
+.dia .presets .btn{padding:4px 7px; font-family:"IBM Plex Mono",monospace; font-weight:500; font-size:11px}
+.dia .presets .btn[aria-pressed="true"]{background:var(--ink); color:var(--plane); border-color:var(--ink)}
+
+.kpis{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line-soft)}
+.kpi{background:var(--panel); padding:9px 12px 10px}
+.kpi .k{font-family:"IBM Plex Sans Condensed",sans-serif; font-size:10px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3)}
+.kpi .v{font-family:"IBM Plex Mono",monospace; font-size:17px; font-weight:500; font-variant-numeric:tabular-nums; margin-top:1px}
+.kpi .v small{font-size:10.5px; color:var(--ink-3); font-weight:400; margin-left:3px}
+.kpi .s{font-size:10.5px; color:var(--ink-3); margin-top:1px}
+
+table.data{width:100%; border-collapse:collapse; font-size:12px}
+table.data th{
+  font-family:"IBM Plex Sans Condensed",sans-serif; font-size:10px; font-weight:600;
+  letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); text-align:right;
+  padding:0 0 5px; border-bottom:1px solid var(--line);
+}
+table.data th:first-child{text-align:left}
+table.data td{padding:4px 0; border-bottom:1px solid var(--line-soft); text-align:right;
+  font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums}
+table.data td:first-child{text-align:left; font-family:"IBM Plex Sans", sans-serif}
+table.data tr:last-child td{border-bottom:0}
+table.data .with-sw{display:flex; align-items:center; gap:7px}
+.barcell{position:relative}
+.barcell .bar{position:absolute; left:0; top:3px; bottom:3px; background:var(--accent-2); opacity:.16; border-radius:1px}
+.barcell span{position:relative}
+
+.prodrow{display:grid; grid-template-columns:1fr 62px 60px; gap:8px; align-items:center; padding:5px 0; border-bottom:1px solid var(--line-soft)}
+.prodrow:last-child{border-bottom:0}
+.prodrow .pn{font-size:12.5px}
+.prodrow .pn i{display:block; font-style:normal; font-family:"IBM Plex Mono",monospace; font-size:10.5px; color:var(--ink-3)}
+.prodrow .pt, .prodrow .pv{font-family:"IBM Plex Mono",monospace; font-size:12.5px; text-align:right; font-variant-numeric:tabular-nums}
+.prodrow .pv{color:var(--ink-2)}
+.prodbar{grid-column:1 / -1; height:4px; background:var(--panel-2); border-radius:2px; overflow:hidden; margin-top:-1px}
+.prodbar i{display:block; height:100%; background:var(--accent-2); border-radius:2px}
+
+details.meth{border-top:1px solid var(--line-soft)}
+details.meth summary{
+  cursor:pointer; padding:11px 14px; font-family:"IBM Plex Sans Condensed",sans-serif;
+  font-size:10.5px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3);
+}
+details.meth .in{padding:0 14px 14px; font-size:11.5px; color:var(--ink-2); line-height:1.5}
+details.meth p{margin:0 0 8px}
+details.meth code{font-family:"IBM Plex Mono",monospace; font-size:11px; background:var(--panel-2); padding:1px 3px; border-radius:2px}
+
+.btnrow{display:flex; gap:6px; margin-top:10px; flex-wrap:wrap}
+.btn{
+  border:1px solid var(--line); background:var(--panel-2); border-radius:var(--radius);
+  padding:6px 10px; cursor:pointer; font-family:"IBM Plex Sans Condensed",sans-serif;
+  font-size:11.5px; font-weight:600; letter-spacing:.03em; color:var(--ink-2);
+}
+.btn:hover{border-color:var(--ink-3); color:var(--ink)}
+.btn.solid{background:var(--ink); color:var(--plane); border-color:var(--ink)}
+.btn.solid:hover{filter:brightness(1.15)}
+
+dialog#brief{
+  border:1px solid var(--line); border-radius:var(--radius); background:var(--panel);
+  color:var(--ink); padding:0; max-width:640px; width:92vw; box-shadow:var(--shadow);
+}
+dialog#brief::backdrop{background:rgba(10,14,10,.55)}
+dialog#brief .dh{display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-bottom:1px solid var(--line)}
+dialog#brief h2{margin:0; font-family:"IBM Plex Sans Condensed",sans-serif; font-size:15px}
+dialog#brief textarea{
+  width:100%; height:44vh; border:0; border-radius:0; background:var(--panel-2); color:var(--ink);
+  font-family:"IBM Plex Mono",monospace; font-size:11.5px; padding:12px 14px; resize:vertical;
+}
+dialog#brief .df{padding:10px 14px; display:flex; gap:8px; justify-content:flex-end}
+
+@media (max-width:1220px){
+  .rail{flex-basis:262px}
+  .rail.right{flex-basis:312px}
+}
+@media (max-width:980px){
+  .app{height:auto; min-height:0}
+  .body{flex-direction:column}
+  .rail, .rail.right{
+    flex:none; width:100%; border:0; border-top:1px solid var(--line);
+    max-height:none; overflow:visible;
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(270px,1fr)); align-items:start;
+  }
+  .rail .hero, .rail details.meth{grid-column:1 / -1}
+  .stage{order:-1; height:72vh; min-height:440px}      /* map first on a phone */
+  .kpis{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+  .topline{gap:14px}
+  .brand .sub{display:none}
+}
+@media (max-width:700px){
+  .ov-tools{max-width:calc(100% - 48px)}
+  .coach{top:auto; bottom:8px; left:8px; right:8px; transform:none; font-size:11.5px}
+}
+@media (max-width:560px){
+  .topline .topstat:nth-child(3){display:none}
+  .stage{height:66vh}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important; animation:none!important}}
+</style>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <h1>Mbolea</h1>
+      <span class="sub">Fertiliser demand &amp; territory planner · Coast–Morogoro corridor, Tanzania</span>
+    </div>
+    <div class="spacer"></div>
+    <div class="topline">
+      <div class="topstat"><span class="k">Mapped cropland</span><span class="v" id="t-ha">—<small>ha</small></span></div>
+      <div class="topstat"><span class="k">Demand in window</span><span class="v" id="t-t">—<small>t</small></span></div>
+      <div class="topstat"><span class="k">Covered by territories</span><span class="v" id="t-cov">—<small>%</small></span></div>
+    </div>
+  </header>
+
+  <div class="body">
+    <!-- ── LEFT RAIL : inputs ─────────────────────────────── -->
+    <aside class="rail" aria-label="Demand assumptions">
+      <section class="sect">
+        <p class="eyebrow">Scenario</p>
+        <div class="seg" id="scenario" role="group" aria-label="Adoption scenario">
+          <button data-s="now" aria-pressed="true">Today</button>
+          <button data-s="subsidy" aria-pressed="false">Subsidy</button>
+          <button data-s="potential" aria-pressed="false">Potential</button>
+        </div>
+        <div class="field">
+          <label for="adopt"><span class="lab">Farmers applying fertiliser</span><span class="val" id="adopt-v">22%</span></label>
+          <input type="range" id="adopt" min="5" max="100" value="22" step="1">
+        </div>
+        <div class="field">
+          <label for="rate"><span class="lab">Rate vs. agronomic recommendation</span><span class="val" id="rate-v">45%</span></label>
+          <input type="range" id="rate" min="10" max="100" value="45" step="1">
+        </div>
+        <div class="field">
+          <label for="share"><span class="lab">Our target market share</span><span class="val" id="share-v">25%</span></label>
+          <input type="range" id="share" min="5" max="100" value="25" step="1">
+        </div>
+      </section>
+
+      <section class="sect">
+        <p class="eyebrow">Product portfolio</p>
+        <div class="field">
+          <label for="p-basal"><span class="lab">Basal (phosphate)</span></label>
+          <select id="p-basal"></select>
+        </div>
+        <div class="field">
+          <label for="p-top"><span class="lab">Top dressing (nitrogen)</span></label>
+          <select id="p-top"></select>
+        </div>
+        <div class="field">
+          <label for="p-k"><span class="lab">Potash</span></label>
+          <select id="p-k"></select>
+        </div>
+        <p class="hint">Nutrient demand is met basal first, then potash, then the nitrogen balance — the way a season programme is actually written.</p>
+      </section>
+
+      <section class="sect">
+        <p class="eyebrow">Crops <span class="note" id="crop-note">click to map one</span></p>
+        <div class="croplist" id="croplist"></div>
+        <div class="btnrow">
+          <button class="btn" id="crops-all">All crops</button>
+          <button class="btn" id="crops-clear">Clear focus</button>
+        </div>
+      </section>
+
+      <section class="sect">
+        <p class="eyebrow">Map layers</p>
+        <div class="checks">
+          <label class="chk"><input type="checkbox" id="l-roads" checked> Trunk roads</label>
+          <label class="chk"><input type="checkbox" id="l-towns" checked> Towns &amp; cities</label>
+          <label class="chk"><input type="checkbox" id="l-parks" checked> Parks &amp; reserves (no cropland)</label>
+          <label class="chk"><input type="checkbox" id="l-dist"> District boundaries</label>
+          <label class="chk"><input type="checkbox" id="l-rivers" checked> Rivers</label>
+          <label class="chk"><input type="checkbox" id="l-grat"> Graticule</label>
+        </div>
+      </section>
+
+      <details class="meth">
+        <summary>Method &amp; assumptions</summary>
+        <div class="in">
+          <p><b>Read this before quoting a number.</b> The field layer is a <i>modelled</i> cropping surface, not a field survey: a 0.055° grid (≈37 km² per cell) is scored for rainfall, floodplain and coastal position, market access and protected-area status, then cropped area is allocated to the crops that actually dominate each agro-ecological zone here — cane and paddy in the Kilombero and Rufiji floodplains, cashew and cassava on the coastal sands, sisal along the Tanga–Korogwe corridor, sorghum and sunflower on the Dodoma-side drylands.</p>
+          <p>Nutrient demand per hectare uses Tanzanian blanket recommendations by crop (N–P<sub>2</sub>O<sub>5</sub>–K<sub>2</sub>O), scaled by the two adoption sliders. Products are then allocated from nutrients at label analysis — <code>DAP 18-46-0</code>, <code>Urea 46-0-0</code>, <code>MOP 0-0-60</code> and so on.</p>
+          <p>Swap the grid for your own shapefiles — a district crop census, NDVI-classified plots, or your dealer sell-out by ward — and every number downstream, territory KPIs included, recalculates unchanged.</p>
+        </div>
+      </details>
+    </aside>
+
+    <!-- ── CENTRE : map ───────────────────────────────────── -->
+    <div class="stage">
+      <div class="mapwrap" id="mapwrap">
+        <canvas id="map"></canvas>
+
+        <div class="ov ov-tools">
+          <button class="tool primary" id="tool-terr" aria-pressed="true">◎ Draw territory</button>
+          <button class="tool" id="tool-pan" aria-pressed="false">✋ Pan</button>
+          <span style="width:6px"></span>
+          <button class="tool" data-mode="demand" aria-pressed="true">Demand</button>
+          <button class="tool" data-mode="crops" aria-pressed="false">Crops</button>
+          <button class="tool" data-mode="gap" aria-pressed="false">Yield gap</button>
+        </div>
+
+        <div class="ov ov-zoom">
+          <button class="tool" id="z-in" title="Zoom in">+</button>
+          <button class="tool" id="z-out" title="Zoom out">−</button>
+          <button class="tool" id="z-fit" title="Fit region" style="font-size:11px">⤢</button>
+        </div>
+
+        <div class="ov ov-legend" id="legend"></div>
+
+        <div class="ov ov-scale">
+          <div class="scalebar" id="scalebar" style="width:80px"></div>
+          <span id="scaletext">100 km</span>
+        </div>
+
+        <div id="tip"></div>
+        <div class="coach" id="coach">
+          <b>Click anywhere on the map</b> to drop a 100 km-wide sales territory — drag to size it.
+          <button id="coach-x" aria-label="Dismiss">×</button>
+        </div>
+      </div>
+
+      <div class="bench" id="bench"></div>
+    </div>
+
+    <!-- ── RIGHT RAIL : results ───────────────────────────── -->
+    <aside class="rail right" aria-label="Territory results">
+      <div class="hero">
+        <div class="who">
+          <input class="name" id="terr-name" value="No territory" aria-label="Territory name"
+                 title="Rename the route — put the rep who owns it here">
+          <span class="pill viable" id="terr-pill">—</span>
+        </div>
+        <div class="figure">
+          <span class="n" id="h-t">0</span><span class="u">t fertiliser / season</span>
+          <span class="d" id="h-d">draw a circle<br>to begin</span>
+        </div>
+        <p class="cap" id="h-cap">Total addressable demand inside the circle at the current scenario.</p>
+        <div class="dia">
+          <label for="dia">Route diameter</label>
+          <input type="number" id="dia" min="16" max="500" step="5" value="100" aria-label="Route diameter in kilometres">
+          <span class="u">km</span>
+          <span class="presets">
+            <button class="btn" data-dia="60">60</button>
+            <button class="btn" data-dia="100">100</button>
+            <button class="btn" data-dia="150">150</button>
+            <button class="btn" data-dia="200">200</button>
+          </span>
+        </div>
+      </div>
+
+      <div class="kpis" id="kpis"></div>
+
+      <section class="sect">
+        <p class="eyebrow">Season programme <span class="note" id="prog-note"></span></p>
+        <div id="products"></div>
+      </section>
+
+      <section class="sect">
+        <p class="eyebrow">Where the tonnes are <span class="note">by crop</span></p>
+        <table class="data" id="croptab"></table>
+      </section>
+
+      <section class="sect">
+        <p class="eyebrow">Districts in range</p>
+        <table class="data" id="disttab"></table>
+        <div class="btnrow">
+          <button class="btn solid" id="brief-btn">Territory brief</button>
+          <button class="btn" id="all-btn">Compare all</button>
+        </div>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<dialog id="brief">
+  <div class="dh"><h2 id="brief-title">Territory brief</h2><button class="btn" id="brief-copy">Copy</button></div>
+  <textarea id="brief-text" readonly spellcheck="false"></textarea>
+  <div class="df"><button class="btn" id="brief-close">Close</button></div>
+</dialog>
+
+<script>
+"use strict";
+/* ════════════════════════════════════════════════════════════
+   1 · GEOGRAPHY — Coast / Morogoro / Tanga corridor
+   Window ≈ 520 × 510 km. Coordinates are simplified outlines
+   digitised to district-planning accuracy, not survey accuracy.
+   ════════════════════════════════════════════════════════════ */
+const B = { lon0: 35.55, lon1: 40.25, lat0: -4.35, lat1: -8.95 };
+const LATM = (B.lat0 + B.lat1) / 2;
+const KM_LAT = 110.574, KM_LON = 111.320 * Math.cos(LATM * Math.PI / 180);
+const W_KM = (B.lon1 - B.lon0) * KM_LON;      // ≈ 519 km
+const H_KM = (B.lat0 - B.lat1) * KM_LAT;      // ≈ 509 km
+
+const wx = lon => (lon - B.lon0) * KM_LON;
+const wy = lat => (B.lat0 - lat) * KM_LAT;
+const lonOf = x => x / KM_LON + B.lon0;
+const latOf = y => B.lat0 - y / KM_LAT;
+
+const COAST = [
+  [39.30,-4.20],[39.22,-4.62],[39.18,-4.88],[39.10,-5.02],[39.02,-5.08],[39.08,-5.26],
+  [38.99,-5.44],[38.92,-5.62],[38.86,-5.86],[38.84,-6.02],[38.90,-6.20],[38.96,-6.42],
+  [39.06,-6.55],[39.22,-6.68],[39.30,-6.82],[39.32,-6.98],[39.38,-7.16],[39.42,-7.38],
+  [39.35,-7.62],[39.42,-7.80],[39.36,-7.98],[39.48,-8.18],[39.52,-8.42],[39.44,-8.62],
+  [39.52,-8.82],[39.55,-9.10]
+];
+const MAINLAND = COAST.concat([[35.30,-9.10],[35.30,-4.20]]);
+
+const ISLANDS = [
+  { id:'unguja', name:'Unguja', pts:[[39.20,-5.72],[39.30,-5.75],[39.36,-5.90],[39.42,-6.02],[39.50,-6.14],
+      [39.55,-6.28],[39.52,-6.42],[39.42,-6.47],[39.32,-6.42],[39.24,-6.28],[39.17,-6.10],[39.15,-5.92]] },
+  { id:'pemba', name:'Pemba', pts:[[39.62,-4.87],[39.72,-4.90],[39.84,-5.05],[39.85,-5.25],
+      [39.78,-5.42],[39.68,-5.45],[39.62,-5.30],[39.60,-5.10]] },
+  { id:'mafia', name:'Mafia', pts:[[39.60,-7.83],[39.72,-7.82],[39.82,-7.92],[39.83,-8.02],[39.74,-8.08],[39.63,-7.99]] }
+];
+
+const PARKS = [
+  { name:'Nyerere National Park', pts:[[37.30,-7.42],[38.25,-7.38],[38.70,-7.66],[38.80,-8.05],[38.62,-8.55],
+      [38.20,-8.90],[37.60,-8.96],[37.05,-8.58],[36.98,-8.00],[37.10,-7.62]] },
+  { name:'Mikumi National Park', pts:[[36.90,-6.98],[37.35,-7.00],[37.45,-7.35],[37.20,-7.60],[36.88,-7.45]] },
+  { name:'Udzungwa Mountains', pts:[[36.42,-7.60],[36.90,-7.68],[36.98,-8.02],[36.60,-8.15],[36.38,-7.90]] },
+  { name:'Saadani National Park', pts:[[38.62,-5.78],[38.90,-5.80],[38.92,-6.12],[38.68,-6.14]] },
+  { name:'Mkomazi National Park', pts:[[37.75,-4.20],[38.30,-4.32],[38.55,-4.70],[38.20,-4.86],[37.80,-4.62]] },
+  { name:'Uluguru Forest Reserve', pts:[[37.56,-6.92],[37.82,-6.96],[37.86,-7.22],[37.60,-7.24]] }
+];
+
+const RIVERS = [
+  { n:'Rufiji',      pts:[[37.10,-8.50],[37.60,-8.30],[38.10,-8.10],[38.60,-8.05],[39.00,-7.95],[39.36,-7.98]] },
+  { n:'Kilombero',   pts:[[35.90,-9.05],[36.30,-8.80],[36.75,-8.40],[37.10,-8.50]] },
+  { n:'Great Ruaha', pts:[[35.60,-7.30],[36.20,-7.55],[36.80,-7.90],[37.10,-8.50]] },
+  { n:'Ruvu',        pts:[[37.60,-6.55],[38.00,-6.62],[38.40,-6.68],[38.80,-6.56],[39.06,-6.55]] },
+  { n:'Wami',        pts:[[37.30,-6.05],[37.80,-6.10],[38.20,-6.05],[38.60,-5.95],[38.84,-6.02]] },
+  { n:'Pangani',     pts:[[37.70,-4.75],[38.10,-5.00],[38.45,-5.15],[38.75,-5.30],[38.99,-5.44]] }
+];
+
+const ROADS = [
+  { n:'A7 Dar – Morogoro – Iringa', t:1, pts:[[39.28,-6.82],[38.98,-6.78],[38.62,-6.72],[38.32,-6.63],
+      [37.95,-6.72],[37.66,-6.82],[37.30,-6.95],[37.05,-7.15],[36.98,-7.42],[36.60,-7.60],[36.10,-7.68],[35.58,-7.72]] },
+  { n:'A14 Chalinze – Segera – Tanga', t:1, pts:[[38.32,-6.63],[38.35,-6.30],[38.30,-5.95],[38.25,-5.60],
+      [38.20,-5.30],[38.45,-5.15],[38.75,-5.12],[39.02,-5.08]] },
+  { n:'A14 Dar – Bagamoyo', t:2, pts:[[39.28,-6.82],[39.15,-6.65],[39.02,-6.52],[38.96,-6.42]] },
+  { n:'B2 Dar – Kibiti – Kilwa', t:1, pts:[[39.28,-6.82],[39.20,-6.98],[39.15,-7.20],[39.02,-7.45],
+      [38.98,-7.72],[39.05,-8.00],[39.20,-8.30],[39.30,-8.55],[39.38,-8.85]] },
+  { n:'Morogoro – Ifakara – Mahenge', t:2, pts:[[37.66,-6.82],[37.35,-7.20],[37.05,-7.55],[36.90,-7.85],
+      [36.68,-8.13],[36.60,-8.45],[36.72,-8.68]] },
+  { n:'Segera – Same', t:2, pts:[[38.20,-5.30],[37.95,-4.95],[37.75,-4.60],[37.62,-4.32]] },
+  { n:'Korogwe – Handeni – Mkata', t:2, pts:[[38.47,-5.15],[38.20,-5.40],[38.02,-5.63],[37.90,-5.95],
+      [37.85,-6.25],[37.95,-6.50],[37.95,-6.72]] },
+  { n:'Kilosa – Gairo – Dodoma', t:2, pts:[[36.98,-6.83],[36.86,-6.55],[36.86,-6.14],[36.55,-6.20],
+      [36.20,-6.18],[35.75,-6.17]] },
+  { n:'Mpwapwa link', t:3, pts:[[36.49,-6.35],[36.42,-6.20]] },
+  { n:'Utete link', t:3, pts:[[38.98,-7.72],[38.77,-7.99]] },
+  { n:'Mkuranga – Kisarawe', t:3, pts:[[39.22,-7.13],[39.05,-6.90],[38.92,-6.77]] }
+];
+
+const TOWNS = [
+  ['Dar es Salaam',39.28,-6.82,1],['Morogoro',37.66,-6.82,1],['Tanga',39.06,-5.07,1],
+  ['Dodoma',35.75,-6.17,1],['Zanzibar',39.20,-6.16,1],
+  ['Bagamoyo',38.90,-6.44,2],['Kibaha',38.92,-6.77,2],['Kilosa',36.98,-6.83,2],
+  ['Ifakara',36.68,-8.13,2],['Handeni',38.02,-5.43,2],['Korogwe',38.47,-5.15,2],
+  ['Mpwapwa',36.49,-6.35,2],['Iringa',35.69,-7.77,2],['Kilwa Masoko',39.44,-8.72,2],
+  ['Chalinze',38.32,-6.63,3],['Mkuranga',39.22,-7.13,3],['Kisarawe',39.05,-6.90,3],
+  ['Utete',38.77,-7.99,3],['Ikwiriri',38.98,-7.72,3],['Kilindoni',39.66,-7.91,3],
+  ['Gairo',36.86,-6.14,3],['Mikumi',37.00,-7.40,3],['Kidatu',36.98,-7.70,3],
+  ['Mahenge',36.72,-8.68,3],['Turiani',37.53,-6.10,3],['Mvomero',37.55,-6.30,3],
+  ['Muheza',38.78,-5.17,3],['Lushoto',38.29,-4.79,3],['Pangani',38.97,-5.43,3],
+  ['Segera',38.25,-5.30,3],['Songe',37.62,-5.75,3],['Kongwa',36.42,-6.20,3],
+  ['Mlandizi',38.72,-6.70,3],['Msata',38.35,-6.30,3],['Saadani',38.78,-6.02,3],
+  ['Dumila',37.30,-6.62,3],['Malinyi',36.15,-8.90,3]
+];
+
+/* district centroids — cells take the nearest one on their own land mass */
+const DISTRICTS = [
+  ['Bagamoyo','Pwani',38.90,-6.44,'m'],       ['Chalinze','Pwani',38.35,-6.55,'m'],
+  ['Kibaha','Pwani',38.92,-6.77,'m'],         ['Kisarawe','Pwani',39.02,-6.95,'m'],
+  ['Mkuranga','Pwani',39.22,-7.15,'m'],       ['Kibiti','Pwani',38.95,-7.72,'m'],
+  ['Rufiji','Pwani',38.60,-8.05,'m'],         ['Mafia','Pwani',39.70,-7.92,'mafia'],
+  ['Dar es Salaam','Dar',39.22,-6.82,'m'],
+  ['Morogoro Rural','Morogoro',37.60,-6.95,'m'], ['Mvomero','Morogoro',37.45,-6.25,'m'],
+  ['Kilosa','Morogoro',36.95,-6.75,'m'],      ['Gairo','Morogoro',36.85,-6.15,'m'],
+  ['Kilombero','Morogoro',36.85,-8.05,'m'],   ['Ulanga','Morogoro',36.65,-8.70,'m'],
+  ['Malinyi','Morogoro',36.15,-8.90,'m'],     ['Mikumi','Morogoro',37.15,-7.45,'m'],
+  ['Tanga City','Tanga',39.05,-5.08,'m'],     ['Muheza','Tanga',38.75,-5.20,'m'],
+  ['Korogwe','Tanga',38.40,-5.20,'m'],        ['Lushoto','Tanga',38.25,-4.75,'m'],
+  ['Handeni','Tanga',38.00,-5.50,'m'],        ['Kilindi','Tanga',37.55,-5.75,'m'],
+  ['Pangani','Tanga',38.90,-5.45,'m'],        ['Mkinga','Tanga',39.05,-4.75,'m'],
+  ['Mpwapwa','Dodoma',36.45,-6.40,'m'],       ['Kongwa','Dodoma',36.35,-6.10,'m'],
+  ['Chamwino','Dodoma',35.90,-6.30,'m'],
+  ['Kilwa','Lindi',39.30,-8.70,'m'],
+  ['Kilolo','Iringa',35.95,-7.60,'m'],        ['Iringa Rural','Iringa',35.70,-7.90,'m'],
+  ['Unguja North','Zanzibar',39.31,-5.88,'unguja'], ['Unguja South','Zanzibar',39.40,-6.28,'unguja'],
+  ['Pemba','Zanzibar',39.72,-5.15,'pemba']
+];
+
+/* ════════════════════════════════════════════════════════════
+   2 · AGRONOMY
+   ════════════════════════════════════════════════════════════ */
+const CROPS = [
+  // key        label                 N   P    K    yield now/pot t/ha   $/t   colour var
+  {k:'maize',   n:'Maize',            N:75, P:25, K:10, y0:1.5,  y1:4.5,  price:265, c:'--c-maize'},
+  {k:'rice',    n:'Rice (paddy)',     N:70, P:20, K:20, y0:2.2,  y1:6.0,  price:480, c:'--c-rice'},
+  {k:'cassava', n:'Cassava',          N:40, P:20, K:60, y0:6.5,  y1:18.0, price:180, c:'--c-cassava'},
+  {k:'cashew',  n:'Cashew',           N:25, P:15, K:20, y0:0.55, y1:1.40, price:900, c:'--c-cashew'},
+  {k:'cane',    n:'Sugarcane',        N:150,P:40, K:80, y0:60,   y1:100,  price:42,  c:'--c-cane'},
+  {k:'sisal',   n:'Sisal',            N:60, P:20, K:40, y0:1.3,  y1:2.8,  price:1100,c:'--c-sisal'},
+  {k:'sunflow', n:'Sunflower',        N:40, P:25, K:10, y0:0.9,  y1:2.2,  price:550, c:'--c-sunflow'},
+  {k:'sorghum', n:'Sorghum & millet', N:40, P:20, K:0,  y0:1.0,  y1:2.5,  price:280, c:'--c-sorghum'},
+  {k:'hort',    n:'Horticulture',     N:120,P:60, K:90, y0:8.0,  y1:22.0, price:400, c:'--c-hort'}
+];
+const CI = {}; CROPS.forEach((c,i)=>{ CI[c.k]=i; });
+/* only these three are painted as a categorical map layer — the all-pairs
+   CVD-safe trio. Everything else maps through single-crop focus. */
+const MAP_CROPS = ['maize','cassava','rice'];
+
+const PRODUCTS = {
+  dap:     {n:'DAP',              a:'18-46-0',        N:.18, P:.46, K:0,   price:760},
+  tsp:     {n:'TSP',              a:'0-46-0',         N:0,   P:.46, K:0,   price:650},
+  minjingu:{n:'Minjingu Mazao',   a:'10-20-0 +Ca,S',  N:.10, P:.20, K:0,   price:470},
+  npk:     {n:'NPK 20-10-10',     a:'20-10-10',       N:.20, P:.10, K:.10, price:640},
+  urea:    {n:'Urea',             a:'46-0-0',         N:.46, P:0,   K:0,   price:560},
+  can:     {n:'CAN',              a:'26-0-0 +Ca',     N:.26, P:0,   K:0,   price:470},
+  sa:      {n:'Sulphate of ammonia', a:'21-0-0 +24S', N:.21, P:0,   K:0,   price:370},
+  mop:     {n:'Muriate of potash',a:'0-0-60',         N:0,   P:0,   K:.60, price:520},
+  none:    {n:'None — potash unmet', a:'', N:0, P:0, K:0, price:0}
+};
+const SCENARIOS = { now:{a:22,r:45}, subsidy:{a:45,r:70}, potential:{a:85,r:100} };
+
+/* ════════════════════════════════════════════════════════════
+   3 · SYNTHETIC FIELD SURFACE
+   ════════════════════════════════════════════════════════════ */
+function mulberry(seed){ return function(){ seed|=0; seed=seed+0x6D2B79F5|0;
+  let t=Math.imul(seed^seed>>>15,1|seed); t=t+Math.imul(t^t>>>7,61|t)^t;
+  return ((t^t>>>14)>>>0)/4294967296; }; }
+const rnd = mulberry(20260829);
+const NG = 256, NOISE = new Float32Array(NG*NG);
+for(let i=0;i<NG*NG;i++) NOISE[i]=rnd();
+function vnoise(x,y){                       // value noise, x/y in grid units
+  const xi=Math.floor(x), yi=Math.floor(y), xf=x-xi, yf=y-yi;
+  const u=xf*xf*(3-2*xf), v=yf*yf*(3-2*yf);
+  const g=(a,b)=>NOISE[((b%NG)+NG)%NG*NG + ((a%NG)+NG)%NG];
+  return (g(xi,yi)*(1-u)+g(xi+1,yi)*u)*(1-v) + (g(xi,yi+1)*(1-u)+g(xi+1,yi+1)*u)*v;
+}
+const fbm=(x,y)=>vnoise(x,y)*.55+vnoise(x*2.1+11,y*2.1+7)*.28+vnoise(x*4.3+31,y*4.3+19)*.17;
+
+function pointInPoly(lon,lat,poly){
+  let inside=false;
+  for(let i=0,j=poly.length-1;i<poly.length;j=i++){
+    const xi=poly[i][0], yi=poly[i][1], xj=poly[j][0], yj=poly[j][1];
+    if(((yi>lat)!==(yj>lat)) && (lon < (xj-xi)*(lat-yi)/(yj-yi)+xi)) inside=!inside;
+  }
+  return inside;
+}
+function coastLonAt(lat){
+  for(let i=0;i<COAST.length-1;i++){
+    const a=COAST[i], b=COAST[i+1];
+    if((lat<=a[1]&&lat>=b[1])||(lat<=b[1]&&lat>=a[1])){
+      const t=(lat-a[1])/((b[1]-a[1])||1e-9);
+      return a[0]+t*(b[0]-a[0]);
+    }
+  }
+  return 39.3;
+}
+function distToLine(lon,lat,pts){            // km, polyline
+  let best=1e9;
+  const px=wx(lon), py=wy(lat);
+  for(let i=0;i<pts.length-1;i++){
+    const ax=wx(pts[i][0]), ay=wy(pts[i][1]), bx=wx(pts[i+1][0]), by=wy(pts[i+1][1]);
+    const dx=bx-ax, dy=by-ay, L=dx*dx+dy*dy;
+    let t = L ? ((px-ax)*dx+(py-ay)*dy)/L : 0; t=Math.max(0,Math.min(1,t));
+    const ex=ax+t*dx-px, ey=ay+t*dy-py;
+    best=Math.min(best, Math.hypot(ex,ey));
+  }
+  return best;
+}
+const gauss=(lon,lat,clon,clat,sig)=>Math.exp(-Math.pow(Math.hypot(wx(lon)-wx(clon),wy(lat)-wy(clat))/sig,2));
+
+const STEP = 0.055;
+const NX = Math.round((B.lon1-B.lon0)/STEP), NY = Math.round((B.lat0-B.lat1)/STEP);
+const CELL_KM2 = (STEP*KM_LON)*(STEP*KM_LAT);
+const CELL_HA  = CELL_KM2*100;
+
+const cells=[]; const gridIdx=new Int32Array(NX*NY).fill(-1);
+
+(function buildCells(){
+  const roadPts = ROADS.filter(r=>r.t<3).map(r=>r.pts);
+  const riverPts = RIVERS.map(r=>r.pts);
+  for(let j=0;j<NY;j++){
+    for(let i=0;i<NX;i++){
+      const lon=B.lon0+(i+.5)*STEP, lat=B.lat0-(j+.5)*STEP;
+      let mass=null;
+      if(lon < coastLonAt(lat)) mass='m';
+      else for(const is of ISLANDS){ if(pointInPoly(lon,lat,is.pts)){ mass=is.id; break; } }
+      if(!mass) continue;
+
+      const dCoast = Math.abs(lon-coastLonAt(lat))*KM_LON;
+      const dRiver = Math.min(...riverPts.map(p=>distToLine(lon,lat,p)));
+      const dRoad  = Math.min(...roadPts.map(p=>distToLine(lon,lat,p)));
+      let dTown=1e9; for(const t of TOWNS){ dTown=Math.min(dTown, Math.hypot(wx(lon)-wx(t[1]), wy(lat)-wy(t[2]))); }
+
+      let park=null;
+      for(const p of PARKS){ if(pointInPoly(lon,lat,p.pts)){ park=p.name; break; } }
+
+      const nz = fbm(i*0.13, j*0.13);
+      /* rainfall proxy, mm — coastal belt, Uluguru/Usambara/Udzungwa orographic,
+         Dodoma & Handeni rain-shadow drylands */
+      let rain = 700
+        + 300*Math.exp(-dCoast/95)
+        + 420*gauss(lon,lat,37.70,-7.00,62)
+        + 400*gauss(lon,lat,38.30,-4.90,58)
+        + 380*gauss(lon,lat,36.70,-8.10,95)
+        - 300*gauss(lon,lat,36.20,-6.30,135)
+        - 300*gauss(lon,lat,37.85,-5.62,105)
+        + (nz-0.5)*300;
+      rain = Math.max(380, Math.min(1900, rain));
+
+      /* cropped share of the cell — most of this landscape is bush, rangeland
+         and fallow; cultivation clusters on rain, rivers, roads and markets */
+      let crop = 0;
+      if(!park){
+        crop = -0.115
+          + 0.32*Math.min(1,Math.max(0,(rain-560)/680))
+          + 0.17*Math.exp(-dRoad/36)
+          + 0.12*Math.exp(-dTown/32)
+          + 0.11*Math.exp(-dRiver/19)
+          + 0.50*(fbm(i*0.21+40, j*0.21+70)-0.40);
+        if(dCoast<22) crop *= 0.72;                       // mangrove & saline flats
+        if(dTown<9)   crop *= 0.50;                       // built-up
+        crop = Math.max(0, Math.min(0.55, crop));
+      }
+      const cropHa = crop*CELL_HA;
+
+      /* crop suitability weights */
+      const w = new Float64Array(CROPS.length);
+      const wet = Math.min(1,Math.max(0,(rain-650)/600));
+      const dry = Math.min(1,Math.max(0,(880-rain)/420));
+      const flood = Math.exp(-dRiver/18);
+      const coastal = Math.exp(-dCoast/85);
+      const south = Math.min(1,Math.max(0,(-lat-6.4)/1.6));
+
+      w[CI.maize]   = 0.55 + 1.05*wet + 0.25*Math.exp(-dRoad/70);
+      w[CI.rice]    = 0.10 + 1.55*flood*wet + 0.55*coastal*wet
+                    + 1.5*gauss(lon,lat,36.85,-8.10,70) + 0.8*gauss(lon,lat,38.75,-7.95,55);
+      w[CI.cassava] = 0.15 + 1.35*coastal + 0.45*dry*coastal + 0.30*wet*0.4;
+      w[CI.cashew]  = 0.05 + 2.10*coastal*south + 1.1*gauss(lon,lat,39.10,-8.30,80)
+                    + 0.7*gauss(lon,lat,39.20,-7.30,60);
+      w[CI.cane]    = 0.02 + 2.6*gauss(lon,lat,36.95,-7.85,42) + 2.2*gauss(lon,lat,37.52,-6.16,32)
+                    + 1.0*gauss(lon,lat,36.75,-8.25,45);
+      w[CI.sisal]   = 0.03 + 1.5*gauss(lon,lat,38.45,-5.25,70) + 1.2*gauss(lon,lat,37.60,-6.30,75)
+                    + 0.8*gauss(lon,lat,38.90,-5.60,55);
+      w[CI.sunflow] = 0.05 + 1.5*dry*Math.exp(-Math.abs(lon-36.5)/1.1) + 0.5*dry;
+      w[CI.sorghum] = 0.05 + 1.75*dry*dry + 0.4*dry;
+      w[CI.hort]    = 0.015 + 0.34*Math.exp(-dTown/22) + 0.30*gauss(lon,lat,37.68,-6.95,38)
+                    + 0.34*gauss(lon,lat,38.28,-4.82,34) + 0.14*Math.exp(-dRiver/14);
+
+      let tot=0;
+      for(let c=0;c<w.length;c++){
+        w[c] *= 0.55 + 1.1*fbm(i*0.31+c*17.7, j*0.31+c*23.3);
+        if(w[c]<0.14) w[c]=0;
+        tot+=w[c];
+      }
+      const areas=new Float32Array(CROPS.length);
+      if(tot>0 && cropHa>0) for(let c=0;c<w.length;c++) areas[c]=cropHa*w[c]/tot;
+
+      /* nearest district on the same land mass */
+      let dIdx=0, dBest=1e9;
+      for(let d=0;d<DISTRICTS.length;d++){
+        const D=DISTRICTS[d];
+        if(D[4]!==mass) continue;
+        const dd=Math.hypot(wx(lon)-wx(D[2]), wy(lat)-wy(D[3]));
+        if(dd<dBest){ dBest=dd; dIdx=d; }
+      }
+
+      gridIdx[j*NX+i]=cells.length;
+      cells.push({ i, j, lon, lat, x:wx(lon), y:wy(lat), mass, park, rain:Math.round(rain),
+                   cropHa, areas, d:dIdx, dRoad, dTown, dCoast });
+    }
+  }
+})();
+
+/* ════════════════════════════════════════════════════════════
+   4 · DEMAND MODEL
+   ════════════════════════════════════════════════════════════ */
+const state = {
+  scenario:'now', adopt:.22, rate:.45, share:.25,
+  basal:'dap', top:'urea', k:'mop',
+  cropsOn: CROPS.map(()=>true), focus:null, defaultR:50,
+  mode:'demand',
+  layers:{roads:true, towns:true, parks:true, dist:false, rivers:true, grat:false},
+  territories:[], sel:-1
+};
+
+function aggregate(list){                       // list of cells → areas by crop
+  const areas=new Float64Array(CROPS.length);
+  const byDist={}; let ha=0;
+  for(const c of list){
+    let cha=0;
+    for(let k=0;k<CROPS.length;k++){
+      if(!state.cropsOn[k]) continue;
+      const a=c.areas[k]; if(!a) continue;
+      areas[k]+=a; cha+=a;
+    }
+    if(cha>0){ ha+=cha; byDist[c.d]=(byDist[c.d]||0)+cha; }
+  }
+  return {areas, ha, byDist, n:list.length};
+}
+function nutrients(areas){
+  const f = state.adopt*state.rate;
+  let N=0,P=0,K=0, gap=0;
+  for(let k=0;k<CROPS.length;k++){
+    const a=areas[k]; if(!a) continue;
+    const C=CROPS[k];
+    N+=a*C.N*f; P+=a*C.P*f; K+=a*C.K*f;
+    gap += a*(C.y1-C.y0)*C.price*state.adopt;    // $ of extra output at reach
+  }
+  return {N,P,K, tot:N+P+K, gap};
+}
+function programme(nu){                          // nutrients (kg) → product tonnes
+  const out=[]; let need={N:nu.N,P:nu.P,K:nu.K};
+  const add=(key,t)=>{ if(t>0.0001) out.push({key,t,p:PRODUCTS[key]}); };
+  const B=PRODUCTS[state.basal];
+  let basalT=0;
+  if(B.P>0 && need.P>0){
+    basalT = need.P/B.P/1000;                    // t
+    need.P=0;
+    need.N=Math.max(0, need.N - basalT*1000*B.N);
+    need.K=Math.max(0, need.K - basalT*1000*B.K);
+    add(state.basal, basalT);
+  }
+  const K=PRODUCTS[state.k];
+  if(K.K>0 && need.K>0){ const t=need.K/K.K/1000; need.K=0; add(state.k,t); }
+  const T=PRODUCTS[state.top];
+  if(T.N>0 && need.N>0){ const t=need.N/T.N/1000; need.N=0; add(state.top,t); }
+  const tot=out.reduce((s,o)=>s+o.t,0);
+  const value=out.reduce((s,o)=>s+o.t*o.p.price,0);
+  return {rows:out, tot, value, unmetK:need.K};
+}
+/* nutrient-kg → product-tonne ratio for the current portfolio, for map shading */
+let RATIO = 1/400;
+function refreshRatio(){
+  const all=aggregate(cells); const nu=nutrients(all.areas); const pr=programme(nu);
+  RATIO = nu.tot>0 ? pr.tot/nu.tot : 1/400;
+  return {all, nu, pr};
+}
+
+/* cell-level intensities for the map, recomputed when inputs change */
+const cellDemand = new Float32Array(cells.length);   // t product / km²
+const cellGap    = new Float32Array(cells.length);   // $ / ha of cropland
+const cellTopCrop= new Int8Array(cells.length);
+let demandMax=1, gapMax=1;
+function pct(arr, p){                            // p-th percentile of non-zero values
+  const v=[]; for(let i=0;i<arr.length;i++) if(arr[i]>0) v.push(arr[i]);
+  if(!v.length) return 1;
+  v.sort((a,b)=>a-b);
+  return v[Math.min(v.length-1, Math.floor(v.length*p))];
+}
+function recomputeCells(){
+  const f=state.adopt*state.rate;
+  for(let n=0;n<cells.length;n++){
+    const c=cells[n]; let N=0,P=0,K=0,gp=0,ha=0,best=-1,bestA=0;
+    for(let k=0;k<CROPS.length;k++){
+      if(!state.cropsOn[k]) continue;
+      const a=c.areas[k]; if(!a) continue;
+      const C=CROPS[k];
+      N+=a*C.N*f; P+=a*C.P*f; K+=a*C.K*f;
+      gp+=a*(C.y1-C.y0)*C.price*state.adopt; ha+=a;
+      if(a>bestA){ bestA=a; best=k; }
+    }
+    cellDemand[n]=(N+P+K)*RATIO/CELL_KM2;         // kg nutrient × (t/kg) ÷ km²
+    cellGap[n]= gp/CELL_KM2;                      // $ of reachable output per km²
+    cellTopCrop[n]=best;
+  }
+  /* scale the ramps to the 96th percentile, not the single hottest cell —
+     otherwise one outlier flattens the whole map into the same step */
+  demandMax=Math.max(pct(cellDemand,0.96), 1e-4);
+  gapMax=Math.max(pct(cellGap,0.96), 1);
+}
+
+/* ════════════════════════════════════════════════════════════
+   5 · TERRITORIES
+   ════════════════════════════════════════════════════════════ */
+const REP_NAMES=['Route A','Route B','Route C','Route D','Route E','Route F','Route G','Route H'];
+let terrSeq=0;
+function newTerritory(lon,lat,rKm){
+  terrSeq++;
+  return { id:terrSeq, name:REP_NAMES[(terrSeq-1)%REP_NAMES.length]+' · '+nearestTown(lon,lat),
+           lon, lat, r:rKm };
+}
+function nearestTown(lon,lat){
+  let best='', d=1e9;
+  for(const t of TOWNS){ const dd=Math.hypot(wx(lon)-wx(t[1]), wy(lat)-wy(t[2]));
+    const bias = dd/(t[3]===1?2.2:t[3]===2?1.35:1);
+    if(bias<d){ d=bias; best=t[0]; } }
+  return best;
+}
+function cellsIn(t){
+  const out=[]; const r2=t.r*t.r; const tx=wx(t.lon), ty=wy(t.lat);
+  for(const c of cells){
+    const dx=c.x-tx, dy=c.y-ty;
+    if(dx*dx+dy*dy<=r2) out.push(c);
+  }
+  return out;
+}
+function analyse(t){
+  const list=cellsIn(t);
+  const ag=aggregate(list);
+  const nu=nutrients(ag.areas);
+  const pr=programme(nu);
+  const area=Math.PI*t.r*t.r;
+  const ourT=pr.tot*state.share, ourV=pr.value*state.share;
+  const farms=ag.ha/1.6;
+  let dealersNow=0;
+  for(const tn of TOWNS){
+    if(Math.hypot(wx(tn[1])-wx(t.lon), wy(tn[2])-wy(t.lat))<=t.r)
+      dealersNow += tn[3]===1?34:tn[3]===2?9:3;
+  }
+  const dealersNeed=Math.ceil(ourT/280);
+  /* graded on the volume one rep would actually carry in a season */
+  const grade = ourT>=1500?'prime':ourT>=500?'viable':'thin';
+  return {t, list, ag, nu, pr, area, ourT, ourV, farms, dealersNow, dealersNeed, grade,
+          density: pr.tot/area, driveH: t.r/45};
+}
+function autoPlan(n, rKm){
+  const step=3;                                 // candidate every 3rd cell
+  const cand=[];
+  for(let idx=0; idx<cells.length; idx+=step) cand.push(cells[idx]);
+  const taken=new Uint8Array(cells.length);
+  const picked=[];
+  const cellIndex=new Map(); cells.forEach((c,i)=>cellIndex.set(c,i));
+  for(let p=0;p<n;p++){
+    let bestC=null, bestV=-1;
+    for(const c of cand){
+      let v=0; const r2=rKm*rKm;
+      for(let i=0;i<cells.length;i++){
+        if(taken[i]) continue;
+        const o=cells[i]; const dx=o.x-c.x, dy=o.y-c.y;
+        if(dx*dx+dy*dy<=r2) v+=cellDemand[i];
+      }
+      if(v>bestV){ bestV=v; bestC=c; }
+    }
+    if(!bestC || bestV<=0) break;
+    for(let i=0;i<cells.length;i++){
+      const o=cells[i]; const dx=o.x-bestC.x, dy=o.y-bestC.y;
+      if(dx*dx+dy*dy<=rKm*rKm) taken[i]=1;
+    }
+    picked.push(newTerritory(bestC.lon,bestC.lat,rKm));
+  }
+  return picked;
+}
+
+/* ════════════════════════════════════════════════════════════
+   6 · RENDERER
+   ════════════════════════════════════════════════════════════ */
+const cv=document.getElementById('map'), ctx=cv.getContext('2d');
+const wrap=document.getElementById('mapwrap');
+let VW=0, VH=0, DPR=1;
+const view={cx:W_KM/2, cy:H_KM/2, s:1};
+let fitScale=1;
+
+const cssv=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+let C={};
+function readColors(){
+  C={ ocean:cssv('--ocean'), oceanLine:cssv('--ocean-line'), land:cssv('--land'), landEdge:cssv('--land-edge'),
+      park:cssv('--park'), parkLine:cssv('--park-line'), road:cssv('--road'), roadTrunk:cssv('--road-trunk'),
+      river:cssv('--river'), district:cssv('--district'), grat:cssv('--grat'), town:cssv('--town'),
+      halo:cssv('--label-halo'), ink:cssv('--ink'), ink2:cssv('--ink-2'), ink3:cssv('--ink-3'),
+      amber:cssv('--amber-mark'), amberSoft:cssv('--amber-soft'), panel:cssv('--panel'),
+      crops:CROPS.map(c=>cssv(c.c)), other:cssv('--c-other') };
+  C.dark = isDark(cssv('--plane'));
+  BLUE   = C.dark ? BLUE_D : BLUE_L;
+  ORANGE = C.dark ? ORANGE_D : ORANGE_L;
+  buildParkPattern();
+}
+let PARK_PAT=null;
+function buildParkPattern(){                       // 45° hatch — "no cropland here"
+  const p=document.createElement('canvas'); p.width=p.height=8;
+  const g=p.getContext('2d');
+  g.fillStyle=C.park; g.fillRect(0,0,8,8);
+  g.strokeStyle=C.parkLine; g.lineWidth=1;
+  g.beginPath(); g.moveTo(-2,6); g.lineTo(6,-2); g.moveTo(2,10); g.lineTo(10,2); g.stroke();
+  PARK_PAT=ctx.createPattern(p,'repeat');
+}
+/* one blue hue, light→dark on a light ground.  On the dark ground the same
+   ramp is re-stepped the other way round, so "near zero" recedes toward the
+   surface in both themes instead of glowing. */
+const BLUE_L=['#cde2fb','#b7d3f6','#9ec5f4','#86b6ef','#6da7ec','#5598e7','#3987e5','#2a78d6','#256abf','#1c5cab','#184f95','#104281','#0d366b'];
+const BLUE_D=['#0f3260','#123a6f','#15457f','#184f95','#1c5cab','#256abf','#2a78d6','#3182dd','#3987e5','#4a90e8','#5598e7','#6da7ec','#86b6ef'];
+const ORANGE_L=['#fbe3d3','#f8cdb0','#f4b490','#ef9a70','#eb8154','#e96a3b','#dd5a2c','#c74d24','#ad411d','#8f3517','#732a12'];
+const ORANGE_D=['#4e1f0e','#5c2410','#732a12','#8f3517','#ad411d','#c74d24','#dd5a2c','#e2622f','#e96a3b','#ec7647','#ef8a5c'];
+let BLUE=BLUE_L, ORANGE=ORANGE_L;
+function ramp(arr,t){ t=Math.max(0,Math.min(1,t)); return arr[Math.min(arr.length-1, Math.floor(t*arr.length))]; }
+function isDark(hex){                              // luminance of the page plane
+  const h=hex.replace('#',''); if(h.length<6) return false;
+  const r=parseInt(h.slice(0,2),16), g=parseInt(h.slice(2,4),16), b=parseInt(h.slice(4,6),16);
+  return (0.2126*r+0.7152*g+0.0722*b) < 110;
+}
+
+function resize(){
+  DPR=Math.min(2, window.devicePixelRatio||1);
+  const nw=wrap.clientWidth, nh=wrap.clientHeight;
+  if(!nw||!nh) return;
+  const wasFit = Math.abs(view.s-fitScale)<1e-6;
+  VW=nw; VH=nh;
+  cv.width=Math.round(VW*DPR); cv.height=Math.round(VH*DPR);
+  cv.style.width=VW+'px'; cv.style.height=VH+'px';
+  fitScale=Math.min(VW/(W_KM*1.02), VH/(H_KM*1.02));
+  if(view.s<0.0001 || wasFit) view.s=fitScale;
+  draw(); paintScale();
+}
+function fit(){ view.cx=W_KM/2; view.cy=H_KM/2; view.s=fitScale; draw(); }
+const sx=x=>(x-view.cx)*view.s+VW/2;
+const sy=y=>(y-view.cy)*view.s+VH/2;
+const ux=px=>(px-VW/2)/view.s+view.cx;
+const uy=py=>(py-VH/2)/view.s+view.cy;
+
+function poly(pts, close){
+  ctx.beginPath();
+  for(let i=0;i<pts.length;i++){
+    const X=sx(wx(pts[i][0])), Y=sy(wy(pts[i][1]));
+    i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);
+  }
+  if(close) ctx.closePath();
+}
+function label(text,X,Y,font,color,align){
+  ctx.font=font; ctx.textAlign=align||'left'; ctx.textBaseline='middle';
+  ctx.lineWidth=3; ctx.strokeStyle=C.halo; ctx.lineJoin='round';
+  ctx.strokeText(text,X,Y); ctx.fillStyle=color; ctx.fillText(text,X,Y);
+}
+
+function draw(){
+  if(!VW) return;
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  ctx.clearRect(0,0,VW,VH);
+  ctx.fillStyle=C.ocean; ctx.fillRect(0,0,VW,VH);
+
+  // ocean texture: depth bands
+  ctx.strokeStyle=C.oceanLine; ctx.lineWidth=1;
+  for(let k=1;k<=3;k++){
+    ctx.beginPath();
+    for(let lat=B.lat0; lat>=B.lat1; lat-=0.1){
+      const X=sx(wx(coastLonAt(lat)+0.16*k)), Y=sy(wy(lat));
+      lat===B.lat0?ctx.moveTo(X,Y):ctx.lineTo(X,Y);
+    }
+    ctx.globalAlpha=0.5/k; ctx.stroke(); ctx.globalAlpha=1;
+  }
+
+  // land
+  ctx.fillStyle=C.land; ctx.strokeStyle=C.landEdge; ctx.lineWidth=1.1;
+  poly(MAINLAND,true); ctx.fill(); ctx.stroke();
+  for(const is of ISLANDS){ poly(is.pts,true); ctx.fill(); ctx.stroke(); }
+
+  // graticule
+  if(state.layers.grat){
+    ctx.strokeStyle=C.grat; ctx.lineWidth=1;
+    for(let lon=36;lon<=40;lon++){ const X=sx(wx(lon)); ctx.beginPath(); ctx.moveTo(X,0); ctx.lineTo(X,VH); ctx.stroke(); }
+    for(let lat=-5;lat>=-9;lat--){ const Y=sy(wy(lat)); ctx.beginPath(); ctx.moveTo(0,Y); ctx.lineTo(VW,Y); ctx.stroke(); }
+  }
+
+  // parks
+  if(state.layers.parks){
+    ctx.fillStyle=PARK_PAT||C.park; ctx.strokeStyle=C.parkLine; ctx.lineWidth=1;
+    for(const p of PARKS){ poly(p.pts,true); ctx.fill(); ctx.stroke(); }
+  }
+
+  drawCells();
+
+  // rivers
+  if(state.layers.rivers){
+    ctx.strokeStyle=C.river; ctx.lineWidth=Math.max(1, 1.6*Math.min(2,view.s/fitScale)); ctx.lineCap='round';
+    for(const r of RIVERS){ poly(r.pts,false); ctx.stroke(); }
+  }
+
+  // district boundaries
+  if(state.layers.dist){
+    ctx.strokeStyle=C.district; ctx.lineWidth=1;
+    ctx.beginPath();
+    const hw=STEP*KM_LON/2, hh=STEP*KM_LAT/2;
+    for(const c of cells){
+      const rIdx=(c.i+1<NX)?gridIdx[c.j*NX+c.i+1]:-1;
+      const bIdx=(c.j+1<NY)?gridIdx[(c.j+1)*NX+c.i]:-1;
+      const X=sx(c.x), Y=sy(c.y), DX=hw*view.s, DY=hh*view.s;
+      if(rIdx>=0 && cells[rIdx].d!==c.d){ ctx.moveTo(X+DX,Y-DY); ctx.lineTo(X+DX,Y+DY); }
+      if(bIdx>=0 && cells[bIdx].d!==c.d){ ctx.moveTo(X-DX,Y+DY); ctx.lineTo(X+DX,Y+DY); }
+    }
+    ctx.stroke();
+  }
+
+  // roads — casing then core, so trunk routes stay legible over the demand layer
+  if(state.layers.roads){
+    ctx.lineCap='round'; ctx.lineJoin='round';
+    const zk=Math.min(2.2,Math.max(1,view.s/fitScale));
+    for(const pass of [0,1]){
+      for(const r of ROADS){
+        const wdt=(r.t===1?2.4:r.t===2?1.6:1.0)*zk;
+        ctx.strokeStyle = pass===0 ? C.halo : (r.t===1?C.roadTrunk:C.road);
+        ctx.lineWidth = pass===0 ? wdt+2.2 : wdt;
+        ctx.globalAlpha = pass===0 ? .55 : 1;
+        poly(r.pts,false); ctx.stroke();
+      }
+    }
+    ctx.globalAlpha=1;
+  }
+
+  drawTerritories();
+
+  // towns
+  if(state.layers.towns){
+    const z=view.s/fitScale;
+    for(const t of TOWNS){
+      if(t[3]===3 && z<1.5) continue;
+      const X=sx(wx(t[1])), Y=sy(wy(t[2]));
+      if(X<-40||X>VW+40||Y<-30||Y>VH+30) continue;
+      const rr = t[3]===1?4:t[3]===2?3:2.1;
+      ctx.beginPath(); ctx.arc(X,Y,rr,0,7); ctx.fillStyle=C.halo; ctx.fill();
+      ctx.beginPath(); ctx.arc(X,Y,rr-1.1,0,7); ctx.fillStyle=C.town; ctx.fill();
+      if(t[3]<=2||z>1.05){
+        const f = t[3]===1 ? '600 12.5px "IBM Plex Sans Condensed", sans-serif'
+                           : '500 11px "IBM Plex Sans Condensed", sans-serif';
+        label(t[0], X+rr+4, Y+.5, f, t[3]===1?C.ink:C.ink2);
+      }
+    }
+  }
+
+  // park & ocean wordmarks
+  const z=view.s/fitScale;
+  if(state.layers.parks && z>1.15){
+    for(const p of PARKS){
+      let mlon=0, mlat=0; p.pts.forEach(q=>{ mlon+=q[0]; mlat+=q[1]; });
+      mlon/=p.pts.length; mlat/=p.pts.length;
+      const X=sx(wx(mlon)), Y=sy(wy(mlat));
+      if(X<0||X>VW||Y<0||Y>VH) continue;
+      label(p.name.replace(' National Park',' NP').replace(' Forest Reserve',' FR')
+                  .replace(' Mountains',' NP'), X, Y,
+        '600 11px "IBM Plex Sans Condensed", sans-serif', C.ink3, 'center');
+    }
+  }
+  if(z<2.2){
+    ctx.save(); ctx.globalAlpha=.55;
+    label('INDIAN OCEAN', sx(wx(39.95)), sy(wy(-6.5)),
+      '600 13px "IBM Plex Sans Condensed", sans-serif', C.ink3, 'center');
+    ctx.restore();
+  }
+  drawHandles();
+}
+
+function drawCells(){
+  const hw=(STEP*KM_LON/2)*view.s, hh=(STEP*KM_LAT/2)*view.s;
+  const w=hw*2+0.6, h=hh*2+0.6;
+  const focus=state.focus;
+  for(let n=0;n<cells.length;n++){
+    const c=cells[n];
+    const X=sx(c.x)-hw, Y=sy(c.y)-hh;
+    if(X<-w||X>VW||Y<-h||Y>VH) continue;
+    let col=null, alpha=1;
+    if(state.mode==='crops'){
+      if(focus!==null){
+        const a=c.areas[focus]; if(!a) continue;
+        const t=Math.min(1, a/(CELL_HA*0.28));
+        if(t<=0.02) continue;
+        col=C.crops[focus]; alpha=0.15+0.85*t;
+      }else{
+        const k=cellTopCrop[n]; if(k<0) continue;
+        const share=c.cropHa/CELL_HA;
+        if(share<0.02) continue;
+        const key=CROPS[k].k, named=MAP_CROPS.includes(key);
+        col = named ? C.crops[k] : C.other;
+        alpha=(named?0.25:0.18)+(named?0.75:0.40)*Math.min(1,share/0.45);
+      }
+    }else if(state.mode==='gap'){
+      const t=cellGap[n]/gapMax; if(t<=0.16) continue;
+      col=ramp(ORANGE, Math.pow(Math.min(1,t),1.25)); alpha=Math.min(1,0.5+t*0.8);
+    }else{
+      const t=cellDemand[n]/demandMax; if(t<=0.16) continue;
+      col=ramp(BLUE, Math.pow(Math.min(1,t),1.25)); alpha=Math.min(1,0.5+t*0.8);
+    }
+    ctx.globalAlpha=alpha; ctx.fillStyle=col;
+    ctx.fillRect(X,Y,w,h);
+  }
+  ctx.globalAlpha=1;
+}
+
+function drawTerritories(){
+  state.territories.forEach((t,i)=>{
+    const X=sx(wx(t.lon)), Y=sy(wy(t.lat)), R=t.r*view.s;
+    const on = i===state.sel;
+    /* only the selected route is filled — stacked washes from overlapping
+       circles would swallow the layer underneath */
+    if(on){
+      ctx.beginPath(); ctx.arc(X,Y,R,0,7);
+      ctx.fillStyle=C.amberSoft; ctx.fill();
+      ctx.save(); ctx.shadowColor=C.amber; ctx.shadowBlur=14;
+    }
+    ctx.beginPath(); ctx.arc(X,Y,R,0,7);
+    ctx.strokeStyle=C.amber; ctx.lineWidth=on?2.4:1.4;
+    ctx.setLineDash(on?[]:[6,4]); ctx.stroke(); ctx.setLineDash([]);
+    if(on) ctx.restore();
+
+    ctx.beginPath(); ctx.moveTo(X-6,Y); ctx.lineTo(X+6,Y); ctx.moveTo(X,Y-6); ctx.lineTo(X,Y+6);
+    ctx.strokeStyle=C.amber; ctx.lineWidth=1.4; ctx.stroke();
+
+    const txt=t.name;
+    ctx.font='600 11.5px "IBM Plex Sans Condensed", sans-serif';
+    const tw=ctx.measureText(txt).width;
+    const bx=X-tw/2-6, by=Y-R-22;
+    if(by>-20 && by<VH){
+      ctx.fillStyle=C.panel; ctx.strokeStyle=C.amber; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.rect(bx,by,tw+12,17); ctx.fill(); ctx.stroke();
+      ctx.fillStyle=C.ink; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(txt, X, by+9);
+    }
+  });
+}
+function drawHandles(){
+  if(state.sel<0) return;
+  const t=state.territories[state.sel];
+  const X=sx(wx(t.lon)), Y=sy(wy(t.lat)), R=t.r*view.s;
+  ctx.beginPath(); ctx.arc(X+R,Y,5.5,0,7);
+  ctx.fillStyle=C.amber; ctx.fill();
+  ctx.strokeStyle=C.panel; ctx.lineWidth=1.6; ctx.stroke();
+}
+
+/* ════════════════════════════════════════════════════════════
+   7 · INTERACTION
+   ════════════════════════════════════════════════════════════ */
+let tool='terr';
+let drag=null;
+const tip=document.getElementById('tip');
+
+function evtPos(e){ const r=cv.getBoundingClientRect(); return [e.clientX-r.left, e.clientY-r.top]; }
+function hitHandle(px,py){
+  if(state.sel<0) return false;
+  const t=state.territories[state.sel];
+  const X=sx(wx(t.lon)), Y=sy(wy(t.lat)), R=t.r*view.s;
+  return Math.hypot(px-(X+R), py-Y)<10;
+}
+function hitTerritory(px,py){
+  for(let i=state.territories.length-1;i>=0;i--){
+    const t=state.territories[i];
+    const X=sx(wx(t.lon)), Y=sy(wy(t.lat));
+    if(Math.hypot(px-X,py-Y) < Math.max(12, Math.min(26, t.r*view.s*0.35))) return i;
+  }
+  return -1;
+}
+
+cv.addEventListener('pointerdown', e=>{
+  cv.setPointerCapture(e.pointerId);
+  const [px,py]=evtPos(e);
+  const panning = tool==='pan' || e.button===1 || e.button===2 || e.shiftKey;
+  if(panning){ drag={mode:'pan', px, py, cx:view.cx, cy:view.cy}; cv.classList.add('panning'); return; }
+  if(hitHandle(px,py)){ drag={mode:'resize'}; return; }
+  const hit=hitTerritory(px,py);
+  if(hit>=0){ select(hit); drag={mode:'move', px, py, lon:state.territories[hit].lon, lat:state.territories[hit].lat}; return; }
+  // new territory
+  const t=newTerritory(lonOf(ux(px)), latOf(uy(py)), state.defaultR);
+  state.territories.push(t); select(state.territories.length-1);
+  drag={mode:'resize', fresh:true};
+  dismissCoach();
+  refreshAll();
+});
+cv.addEventListener('pointermove', e=>{
+  const [px,py]=evtPos(e);
+  if(drag){
+    if(drag.mode==='pan'){
+      view.cx=drag.cx-(px-drag.px)/view.s; view.cy=drag.cy-(py-drag.py)/view.s; draw();
+    }else if(drag.mode==='resize'){
+      const t=state.territories[state.sel];
+      const r=Math.hypot(ux(px)-wx(t.lon), uy(py)-wy(t.lat));
+      t.r=Math.max(8, Math.min(260, r));
+      if(drag.fresh && t.r<12) t.r=state.defaultR;
+      draw(); paintResults(); paintBench();
+    }else if(drag.mode==='move'){
+      const t=state.territories[state.sel];
+      t.lon=lonOf(ux(px)); t.lat=latOf(uy(py));
+      t.name=t.name.replace(/·.*/, '· '+nearestTown(t.lon,t.lat));
+      draw(); paintResults(); paintBench();
+    }
+    tip.style.display='none';
+    return;
+  }
+  showTip(px,py,e);
+});
+window.addEventListener('pointerup', ()=>{
+  if(drag && drag.mode==='resize'){ refreshAll(); }
+  drag=null; cv.classList.remove('panning');
+});
+cv.addEventListener('pointerleave', ()=>{ tip.style.display='none'; });
+cv.addEventListener('contextmenu', e=>e.preventDefault());
+cv.addEventListener('wheel', e=>{
+  e.preventDefault();
+  const [px,py]=evtPos(e);
+  const wxp=ux(px), wyp=uy(py);
+  const k=Math.exp(-e.deltaY*0.0016);
+  view.s=Math.max(fitScale*0.85, Math.min(fitScale*9, view.s*k));
+  view.cx=wxp-(px-VW/2)/view.s; view.cy=wyp-(py-VH/2)/view.s;
+  draw(); paintScale();
+},{passive:false});
+
+function showTip(px,py,e){
+  const lon=lonOf(ux(px)), lat=latOf(uy(py));
+  const i=Math.floor((lon-B.lon0)/STEP), j=Math.floor((B.lat0-lat)/STEP);
+  if(i<0||i>=NX||j<0||j>=NY){ tip.style.display='none'; return; }
+  const n=gridIdx[j*NX+i];
+  if(n<0){ tip.style.display='none'; return; }
+  const c=cells[n];
+  const D=DISTRICTS[c.d];
+  let rows='';
+  if(c.park){
+    rows=`<div class="t-r"><span>Protected area</span><b>—</b></div>
+          <div class="t-r"><span>Cropland</span><b>0 ha</b></div>`;
+  }else{
+    let ha=0, best=-1, bestA=0;
+    for(let k=0;k<CROPS.length;k++){ if(!state.cropsOn[k])continue; const a=c.areas[k];
+      ha+=a; if(a>bestA){bestA=a;best=k;} }
+    const t = cellDemand[n]*CELL_KM2;
+    rows=`<div class="t-r"><span>Cropland</span><b>${fmt(ha,0)} ha</b></div>
+          <div class="t-r"><span>Demand</span><b>${fmt(t,t<10?1:0)} t</b></div>
+          <div class="t-r"><span>Rainfall</span><b>${c.rain} mm</b></div>`;
+    if(best>=0) rows+=`<div class="t-crop"><span class="sw" style="background:${C.crops[best]}"></span>
+      Mostly ${CROPS[best].n.toLowerCase()} · ${fmt(bestA,0)} ha</div>`;
+  }
+  tip.innerHTML=`<div class="t-h">${c.park?c.park:D[0]}${c.park?'':' · '+D[1]}</div>${rows}`;
+  tip.style.display='block';
+  const tw=tip.offsetWidth, th=tip.offsetHeight;
+  tip.style.left=Math.min(VW-tw-8, px+14)+'px';
+  tip.style.top=Math.max(6, Math.min(VH-th-8, py-th-12))+'px';
+}
+
+/* ════════════════════════════════════════════════════════════
+   8 · UI PAINTING
+   ════════════════════════════════════════════════════════════ */
+const $=id=>document.getElementById(id);
+function fmt(n,d){
+  if(!isFinite(n)) return '—';
+  if(d===undefined) d = n>=1000?0 : n>=100?0 : n>=10?1 : 2;
+  return n.toLocaleString('en-US',{minimumFractionDigits:d, maximumFractionDigits:d});
+}
+function money(n){
+  if(n>=1e6) return '$'+fmt(n/1e6,n/1e6>=10?1:2)+'M';
+  if(n>=1e3) return '$'+fmt(n/1e3,0)+'k';
+  return '$'+fmt(n,0);
+}
+
+function select(i){ state.sel=i; paintBench(); paintResults(); draw(); }
+
+function paintBench(){
+  const b=$('bench'); b.innerHTML='';
+  const mk=(label,fn,cls)=>{ const el=document.createElement('button');
+    el.className='btn'+(cls?' '+cls:''); el.textContent=label; el.onclick=fn; return el; };
+  b.appendChild(mk('＋ Territory', ()=>{
+    const t=newTerritory(lonOf(view.cx), latOf(view.cy), state.defaultR);
+    state.territories.push(t); select(state.territories.length-1); refreshAll(); dismissCoach();
+  },'solid'));
+  b.appendChild(mk('Auto-plan 5 routes', ()=>{
+    const r = state.defaultR;
+    state.territories = autoPlan(5, r);
+    terrSeq=0; state.territories.forEach((t,i)=>{ t.id=++terrSeq;
+      t.name=REP_NAMES[i%REP_NAMES.length]+' · '+nearestTown(t.lon,t.lat); });
+    select(0); refreshAll(); dismissCoach();
+  }));
+  if(state.territories.length){
+    b.appendChild(mk('Clear', ()=>{ state.territories=[]; state.sel=-1; refreshAll(); }));
+  }
+  const sep=document.createElement('span'); sep.style.cssText='flex:0 0 1px;height:22px;background:var(--line)';
+  b.appendChild(sep);
+
+  if(!state.territories.length){
+    const e=document.createElement('span'); e.className='empty';
+    e.textContent='No territories yet — click the map to drop one.';
+    b.appendChild(e); return;
+  }
+  state.territories.forEach((t,i)=>{
+    const a=analyse(t);
+    const el=document.createElement('button');
+    el.className='terr'; el.setAttribute('aria-current', i===state.sel?'true':'false');
+    el.innerHTML=`<span class="tn">${t.name}</span>
+      <span class="tv">${fmt(a.pr.tot,0)} t · ⌀${fmt(t.r*2,0)} km</span>`;
+    el.onclick=()=>select(i);
+    const x=document.createElement('button'); x.className='tx'; x.textContent='×';
+    x.title='Remove territory';
+    x.onclick=ev=>{ ev.stopPropagation(); state.territories.splice(i,1);
+      state.sel=Math.min(state.sel, state.territories.length-1); refreshAll(); };
+    el.appendChild(x);
+    b.appendChild(el);
+  });
+}
+
+function paintResults(){
+  const sel=state.sel>=0 ? state.territories[state.sel] : null;
+  const nameEl=$('terr-name');
+  if(!sel){
+    nameEl.value='No territory'; nameEl.disabled=true;
+    $('terr-pill').textContent='—'; $('terr-pill').className='pill viable';
+    $('h-t').textContent='0'; $('h-d').innerHTML='draw a circle<br>to begin';
+    $('h-cap').textContent='Click the map to drop a 100 km-wide territory. Everything on the right recalculates from what falls inside it.';
+    $('kpis').innerHTML=''; $('products').innerHTML='';
+    $('croptab').innerHTML=''; $('disttab').innerHTML='';
+    return;
+  }
+  nameEl.disabled=false; nameEl.value=sel.name;
+  const a=analyse(sel);
+  const dia=Math.round(sel.r*2);
+  if(document.activeElement!==$('dia')) $('dia').value=dia;
+  document.querySelectorAll('.dia .presets .btn').forEach(b=>
+    b.setAttribute('aria-pressed', +b.dataset.dia===dia?'true':'false'));
+
+  $('terr-pill').textContent = a.grade==='prime'?'Prime route':a.grade==='viable'?'Viable':'Thin';
+  $('terr-pill').className='pill '+a.grade;
+  $('h-t').textContent=fmt(a.pr.tot,0);
+  $('h-d').innerHTML=`${fmt(sel.r*2,0)} km across<br>${fmt(a.area/1000,0)}k km² of ground`;
+  $('h-cap').textContent=`${fmt(a.ag.ha,0)} ha of cropland · ${fmt(a.farms,0)} farming households · `+
+    `${Object.keys(a.ag.byDist).length} districts in range.`;
+
+  const K=[
+    ['Our volume target', fmt(a.ourT,0), 't', `${Math.round(state.share*100)}% share of route demand`],
+    ['Revenue at target', money(a.ourV), '', 'ex-works, current price list'],
+    ['Demand density', fmt(a.density,1), 't/km²',
+      a.density>=1.0?'dense — worth a resident rep'
+      : a.density>=0.45?'workable on a weekly loop'
+      : 'thin — pair with a neighbouring route'],
+    ['Agro-dealers to hold volume', fmt(a.dealersNeed,0), '', `${a.dealersNow} outlets exist in range`],
+    ['Drive to edge', fmt(a.driveH,1), 'h', 'at 45 km/h on these roads'],
+    ['Calls per month', fmt(a.dealersNeed*2 + 12,0), '', '2 per dealer + 12 farmer demos']
+  ];
+  $('kpis').innerHTML=K.map(k=>`<div class="kpi"><div class="k">${k[0]}</div>
+    <div class="v">${k[1]}${k[2]?`<small>${k[2]}</small>`:''}</div><div class="s">${k[3]}</div></div>`).join('');
+
+  const maxT=Math.max(...a.pr.rows.map(r=>r.t),1);
+  $('prog-note').textContent = a.pr.unmetK>0 ? 'potash not covered' : '';
+  $('products').innerHTML = a.pr.rows.map(r=>`
+    <div class="prodrow">
+      <div class="pn">${r.p.n}<i>${r.p.a}</i></div>
+      <div class="pt">${fmt(r.t,0)} t</div>
+      <div class="pv">${money(r.t*r.p.price)}</div>
+      <div class="prodbar"><i style="width:${(r.t/maxT*100).toFixed(1)}%"></i></div>
+    </div>`).join('') +
+    `<div class="prodrow" style="border-top:1px solid var(--line);margin-top:4px;padding-top:7px">
+      <div class="pn"><b>Total programme</b></div>
+      <div class="pt"><b>${fmt(a.pr.tot,0)} t</b></div>
+      <div class="pv"><b>${money(a.pr.value)}</b></div>
+    </div>`;
+
+  const rows=CROPS.map((c,k)=>({c,k,ha:a.ag.areas[k]})).filter(r=>r.ha>0)
+    .sort((x,y)=>y.ha-x.ha);
+  const f=state.adopt*state.rate;
+  const tByCrop=rows.map(r=>r.ha*(r.c.N+r.c.P+r.c.K)*f*RATIO/1000*1000);
+  const maxTc=Math.max(...tByCrop,1);
+  $('croptab').innerHTML=`<tr><th>Crop</th><th>Hectares</th><th>Tonnes</th></tr>`+
+    rows.map((r,ix)=>`<tr>
+      <td><span class="with-sw"><span class="sw" style="background:${C.crops[r.k]}"></span>${r.c.n}</span></td>
+      <td>${fmt(r.ha,0)}</td>
+      <td class="barcell"><span class="bar" style="width:${(tByCrop[ix]/maxTc*100).toFixed(0)}%"></span>
+      <span>${fmt(tByCrop[ix],0)}</span></td></tr>`).join('');
+
+  const dr=Object.entries(a.ag.byDist).map(([d,ha])=>({d:+d,ha})).sort((x,y)=>y.ha-x.ha).slice(0,7);
+  const maxD=Math.max(...dr.map(r=>r.ha),1);
+  $('disttab').innerHTML=`<tr><th>District</th><th>Region</th><th>Cropland ha</th></tr>`+
+    dr.map(r=>`<tr><td>${DISTRICTS[r.d][0]}</td><td style="text-align:left;color:var(--ink-3)">${DISTRICTS[r.d][1]}</td>
+      <td class="barcell"><span class="bar" style="width:${(r.ha/maxD*100).toFixed(0)}%"></span>
+      <span>${fmt(r.ha,0)}</span></td></tr>`).join('');
+}
+
+function paintTop(){
+  const {all, nu, pr}=refreshRatio();
+  $('t-ha').innerHTML=fmt(all.ha/1000,0)+'k<small>ha</small>';
+  $('t-t').innerHTML=fmt(pr.tot/1000,0)+'k<small>t</small>';
+  const covered=new Set();
+  for(const t of state.territories){
+    const r2=t.r*t.r, tx=wx(t.lon), ty=wy(t.lat);
+    for(let i=0;i<cells.length;i++){ const c=cells[i]; const dx=c.x-tx, dy=c.y-ty;
+      if(dx*dx+dy*dy<=r2) covered.add(i); }
+  }
+  let cov=0; for(const i of covered) cov+=cellDemand[i]*CELL_KM2;
+  const pct = pr.tot>0 ? cov/pr.tot*100 : 0;
+  $('t-cov').innerHTML=fmt(Math.min(100,pct),0)+'<small>%</small>';
+  return {all,nu,pr};
+}
+
+function paintCropList(){
+  const el=$('croplist'); el.innerHTML='';
+  const all=aggregate(cells);
+  const f=state.adopt*state.rate;
+  CROPS.forEach((c,k)=>{
+    const ha=cells.reduce((s,cc)=>s+cc.areas[k],0);
+    const t=ha*(c.N+c.P+c.K)*f*RATIO;
+    const b=document.createElement('button');
+    b.className='crop';
+    b.dataset.on = state.cropsOn[k]?'1':'0';
+    b.dataset.focus = state.focus===k?'1':'0';
+    b.innerHTML=`<span class="sw" style="background:${C.crops[k]}"></span>
+      <span class="nm">${c.n}</span><span class="qt">${fmt(t/1000,0)}k t</span>`;
+    b.title = state.focus===k ? 'Click to stop mapping this crop alone'
+      : 'Click to map this crop alone · Alt-click to exclude it from demand';
+    b.onclick=(e)=>{
+      if(e.altKey){ state.cropsOn[k]=!state.cropsOn[k]; if(!state.cropsOn[k]&&state.focus===k) state.focus=null; }
+      else { state.focus = state.focus===k ? null : k;
+             if(state.focus!==null){ state.mode='crops'; syncModeButtons(); } }
+      refreshAll();
+    };
+    el.appendChild(b);
+  });
+  $('crop-note').textContent = state.focus!==null ? 'mapping '+CROPS[state.focus].n.toLowerCase() : 'click to map one';
+}
+
+function paintLegend(){
+  const l=$('legend');
+  if(state.mode==='demand'){
+    l.innerHTML=`<div class="lg-title">Fertiliser demand · t / km²</div>
+      <div class="ramp" style="background:linear-gradient(90deg,${BLUE.join(',')})"></div>
+      <div class="ramp-ax"><span>0</span><span>${fmt(demandMax/2,1)}</span><span>${fmt(demandMax,1)}+</span></div>`;
+  }else if(state.mode==='gap'){
+    l.innerHTML=`<div class="lg-title">Yield gap · $ per km² of ground</div>
+      <div class="ramp" style="background:linear-gradient(90deg,${ORANGE.join(',')})"></div>
+      <div class="ramp-ax"><span>0</span><span>${money(gapMax/2)}</span><span>${money(gapMax)}</span></div>`;
+  }else{
+    if(state.focus!==null){
+      l.innerHTML=`<div class="lg-title">${CROPS[state.focus].n} · hectares per cell</div>
+        <div class="ramp" style="background:linear-gradient(90deg,transparent,${C.crops[state.focus]})"></div>
+        <div class="ramp-ax"><span>0</span><span>${fmt(CELL_HA*0.28,0)} ha</span></div>`;
+    }else{
+      l.innerHTML=`<div class="lg-title">Dominant crop</div>`+
+        MAP_CROPS.map(k=>`<div class="lgrow"><span class="sw" style="background:${C.crops[CI[k]]}"></span>${CROPS[CI[k]].n}</div>`).join('')+
+        `<div class="lgrow"><span class="sw" style="background:${C.other}"></span>Other crops — click one at left</div>`;
+    }
+  }
+}
+function paintScale(){
+  const targets=[10,25,50,100,200,300];
+  let km=100;
+  for(const t of targets){ if(t*view.s<=150) km=t; }
+  const px=km*view.s;
+  $('scalebar').style.width=Math.max(24,px)+'px';
+  $('scaletext').textContent=km+' km';
+}
+
+function refreshAll(){
+  paintTop();
+  recomputeCells();
+  paintCropList();
+  paintLegend();
+  paintScale();
+  paintBench();
+  paintResults();
+  draw();
+}
+
+/* ── controls ─────────────────────────────────────────────── */
+function syncModeButtons(){
+  document.querySelectorAll('[data-mode]').forEach(b=>
+    b.setAttribute('aria-pressed', b.dataset.mode===state.mode?'true':'false'));
+}
+document.querySelectorAll('[data-mode]').forEach(b=>{
+  b.onclick=()=>{ state.mode=b.dataset.mode;
+    if(state.mode!=='crops') state.focus=null;
+    syncModeButtons(); refreshAll(); };
+});
+$('tool-terr').onclick=()=>{ tool='terr';
+  $('tool-terr').setAttribute('aria-pressed','true'); $('tool-pan').setAttribute('aria-pressed','false');
+  cv.classList.remove('panmode'); };
+$('tool-pan').onclick=()=>{ tool='pan';
+  $('tool-pan').setAttribute('aria-pressed','true'); $('tool-terr').setAttribute('aria-pressed','false');
+  cv.classList.add('panmode'); };
+$('z-in').onclick=()=>{ view.s=Math.min(fitScale*9, view.s*1.35); draw(); paintScale(); };
+$('z-out').onclick=()=>{ view.s=Math.max(fitScale*0.85, view.s/1.35); draw(); paintScale(); };
+$('z-fit').onclick=()=>{ fit(); paintScale(); };
+
+function bindSlider(id, key, fmtr){
+  const el=$(id), out=$(id+'-v');
+  el.oninput=()=>{ state[key]=+el.value/100; out.textContent=el.value+'%';
+    if(id!=='share'){ document.querySelectorAll('#scenario button').forEach(b=>b.setAttribute('aria-pressed','false')); }
+    refreshAll(); };
+}
+bindSlider('adopt','adopt'); bindSlider('rate','rate'); bindSlider('share','share');
+document.querySelectorAll('#scenario button').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('#scenario button').forEach(x=>x.setAttribute('aria-pressed','false'));
+    b.setAttribute('aria-pressed','true');
+    const s=SCENARIOS[b.dataset.s]; state.scenario=b.dataset.s;
+    state.adopt=s.a/100; state.rate=s.r/100;
+    $('adopt').value=s.a; $('adopt-v').textContent=s.a+'%';
+    $('rate').value=s.r;  $('rate-v').textContent=s.r+'%';
+    refreshAll();
+  };
+});
+function fillSelect(id, keys, cur){
+  const el=$(id); el.innerHTML=keys.map(k=>
+    `<option value="${k}"${k===cur?' selected':''}>${PRODUCTS[k].n}${PRODUCTS[k].a?' · '+PRODUCTS[k].a:''}</option>`).join('');
+}
+fillSelect('p-basal',['dap','tsp','minjingu','npk'],'dap');
+fillSelect('p-top',['urea','can','sa'],'urea');
+fillSelect('p-k',['mop','none'],'mop');
+$('p-basal').onchange=e=>{ state.basal=e.target.value; refreshAll(); };
+$('p-top').onchange=e=>{ state.top=e.target.value; refreshAll(); };
+$('p-k').onchange=e=>{ state.k=e.target.value; refreshAll(); };
+
+Object.entries({'l-roads':'roads','l-towns':'towns','l-parks':'parks',
+                'l-dist':'dist','l-rivers':'rivers','l-grat':'grat'}).forEach(([id,key])=>{
+  $(id).onchange=e=>{ state.layers[key]=e.target.checked; draw(); };
+});
+$('crops-all').onclick=()=>{ state.cropsOn=CROPS.map(()=>true); state.focus=null; refreshAll(); };
+$('crops-clear').onclick=()=>{ state.focus=null; refreshAll(); };
+$('terr-name').oninput=e=>{ if(state.sel>=0){ state.territories[state.sel].name=e.target.value;
+  paintBench(); draw(); } };
+
+/* route diameter — the number a field manager actually argues about */
+function setDiameter(km){
+  km=Math.max(16, Math.min(500, km||0));
+  state.defaultR=km/2;
+  if(state.sel>=0){ state.territories[state.sel].r=km/2; paintBench(); paintResults(); draw(); }
+  else paintResults();
+}
+$('dia').oninput=e=>setDiameter(+e.target.value);
+document.querySelectorAll('.dia .presets .btn').forEach(b=>{
+  b.onclick=()=>{ $('dia').value=b.dataset.dia; setDiameter(+b.dataset.dia); };
+});
+
+/* keyboard: the map is focusable so a territory can be placed and tuned
+   without a mouse */
+cv.tabIndex=0;
+cv.setAttribute('aria-label','Territory map. Enter drops a route at the map centre; arrow keys move it; bracket keys resize it; Delete removes it.');
+cv.addEventListener('keydown', e=>{
+  const stepKm = e.shiftKey ? 25 : 5;
+  if(e.key==='Enter' || e.key===' '){
+    const t=newTerritory(lonOf(view.cx), latOf(view.cy), state.defaultR);
+    state.territories.push(t); select(state.territories.length-1); refreshAll(); dismissCoach();
+    e.preventDefault(); return;
+  }
+  if(state.sel<0) return;
+  const t=state.territories[state.sel];
+  let hit=true;
+  switch(e.key){
+    case 'ArrowLeft':  t.lon-=stepKm/KM_LON; break;
+    case 'ArrowRight': t.lon+=stepKm/KM_LON; break;
+    case 'ArrowUp':    t.lat+=stepKm/KM_LAT; break;
+    case 'ArrowDown':  t.lat-=stepKm/KM_LAT; break;
+    case '[': case '-': t.r=Math.max(8, t.r-stepKm); break;
+    case ']': case '+': case '=': t.r=Math.min(260, t.r+stepKm); break;
+    case 'Delete': case 'Backspace':
+      state.territories.splice(state.sel,1);
+      state.sel=Math.min(state.sel, state.territories.length-1); break;
+    default: hit=false;
+  }
+  if(hit){
+    e.preventDefault();
+    if(state.sel>=0 && state.territories[state.sel])
+      t.name=t.name.replace(/·.*/, '· '+nearestTown(t.lon,t.lat));
+    refreshAll();
+  }
+});
+
+function dismissCoach(){ const c=$('coach'); if(c) c.hidden=true; }
+$('coach-x').onclick=dismissCoach;
+
+/* ── territory brief ──────────────────────────────────────── */
+const dlg=$('brief');
+function briefText(list){
+  const L=[];
+  L.push('MBOLEA — TERRITORY PLAN');
+  L.push('Coast–Morogoro corridor, Tanzania · '+new Date().toISOString().slice(0,10));
+  L.push('Scenario: '+Math.round(state.adopt*100)+'% of farmers applying, '+
+         Math.round(state.rate*100)+'% of recommended rate, '+Math.round(state.share*100)+'% target share');
+  L.push('Portfolio: '+PRODUCTS[state.basal].n+' basal / '+PRODUCTS[state.top].n+' top-dress / '+PRODUCTS[state.k].n);
+  L.push('');
+  for(const t of list){
+    const a=analyse(t);
+    L.push('── '+t.name.toUpperCase());
+    L.push('   Centre '+t.lat.toFixed(3)+'°, '+t.lon.toFixed(3)+'°  ·  '+fmt(t.r*2,0)+' km across  ·  '+
+           fmt(a.area/1000,0)+'k km²');
+    L.push('   Cropland '+fmt(a.ag.ha,0)+' ha  ·  '+fmt(a.farms,0)+' households');
+    L.push('   Route demand '+fmt(a.pr.tot,0)+' t   |   OUR TARGET '+fmt(a.ourT,0)+' t  ('+money(a.ourV)+')');
+    L.push('   Dealers needed '+a.dealersNeed+' (of '+a.dealersNow+' outlets in range)  ·  '+
+           fmt(a.dealersNeed*2+12,0)+' calls/month  ·  '+fmt(a.driveH,1)+' h to edge');
+    a.pr.rows.forEach(r=>L.push('     '+r.p.n.padEnd(22)+fmt(r.t*state.share,0).padStart(8)+' t'));
+    const top=CROPS.map((c,k)=>({c,ha:a.ag.areas[k]})).sort((x,y)=>y.ha-x.ha).slice(0,3)
+      .filter(r=>r.ha>0).map(r=>r.c.n+' '+fmt(r.ha/1000,0)+'k ha');
+    L.push('   Crop base: '+top.join(' · '));
+    L.push('   Grade: '+a.grade.toUpperCase());
+    L.push('');
+  }
+  L.push('Figures come from a modelled cropping surface — calibrate against dealer sell-out before setting quota.');
+  return L.join('\n');
+}
+$('brief-btn').onclick=()=>{
+  if(state.sel<0) return;
+  $('brief-title').textContent='Territory brief · '+state.territories[state.sel].name;
+  $('brief-text').value=briefText([state.territories[state.sel]]);
+  dlg.showModal();
+};
+$('all-btn').onclick=()=>{
+  if(!state.territories.length) return;
+  $('brief-title').textContent='All territories · '+state.territories.length+' routes';
+  $('brief-text').value=briefText(state.territories);
+  dlg.showModal();
+};
+$('brief-close').onclick=()=>dlg.close();
+$('brief-copy').onclick=async()=>{
+  const ta=$('brief-text'); ta.select();
+  try{ await navigator.clipboard.writeText(ta.value); $('brief-copy').textContent='Copied'; }
+  catch(e){ document.execCommand&&document.execCommand('copy'); $('brief-copy').textContent='Selected — press ⌘C'; }
+  setTimeout(()=>{ $('brief-copy').textContent='Copy'; },1800);
+};
+
+/* ── boot ─────────────────────────────────────────────────── */
+function boot(){
+  readColors();
+  resize(); fit();
+  recomputeCells(); refreshRatio(); recomputeCells();
+  // seed one territory on the Dar–Chalinze corridor so the tool opens with an answer
+  const seed=newTerritory(38.75,-6.72,state.defaultR);
+  state.territories.push(seed); state.sel=0;
+  refreshAll();
+}
+window.addEventListener('resize', resize);
+new ResizeObserver(()=>resize()).observe(wrap);
+const mq=window.matchMedia('(prefers-color-scheme: dark)');
+mq.addEventListener('change', ()=>{ readColors(); paintCropList(); paintLegend(); paintResults(); draw(); });
+new MutationObserver(()=>{ readColors(); paintCropList(); paintLegend(); paintResults(); draw(); })
+  .observe(document.documentElement,{attributes:true, attributeFilter:['data-theme']});
+boot();
+</script>
