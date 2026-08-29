@@ -29,7 +29,7 @@ mineral exploration, agriculture, maritime operations, satellite earth observati
 
 ### Selected output
 
-- 125+ peer-reviewed publications · h-index 11
+- 116 publications on Google Scholar · 869 citations · h-index 13 · i10-index 15
 - ~30 international patents
 - 10 books and 3 coursebooks across 4 languages
 - Springer volume on PINNs for industrial applications (in progress)
@@ -40,6 +40,6 @@ mineral exploration, agriculture, maritime operations, satellite earth observati
 
 - LinkedIn — https://www.linkedin.com/in/dmitry-mikhaylov
 - Substack — https://dmitrymikhaylov.substack.com
-- Google Scholar — https://scholar.google.com/citations?user=KmR6GzgAAAAJ
+- Google Scholar — https://scholar.google.com/citations?user=tfdBDF8AAAAJ
 - ORCID — https://orcid.org/0009-0009-2108-6820
 - Wikidata — https://www.wikidata.org/wiki/Q88500243
