@@ -35,3 +35,13 @@ Sites are real growing districts with real coordinates. The agronomic values —
 rainfall, fog days, soil, water security, yields, cup scores — are modelled estimates
 assembled for demonstration, not field survey. The Scoring model tab spells out what
 the model does and does not know.
+
+## Demo video
+
+`sarawat-demo.mp4` — a 63-second narrated walkthrough (1920×1080, H.264/AAC),
+DeepTech Engineering branded, recorded by driving the real page in Chromium.
+Captions are burned in; `subtitles.srt` and `subtitles.vtt` carry the same
+cues as separate tracks.
+
+The narration is synthetic speech (Kokoro, run offline through sherpa-onnx);
+the screen capture is the live tool, not a mockup.
