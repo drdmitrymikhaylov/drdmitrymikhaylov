@@ -109,3 +109,18 @@ scene.
 laboratory queues. Holder names are invented; no real company's tenure or results are
 represented here. This is a working prototype of the tool, not a feed from the Mining
 Cadastre.
+
+## Demo video
+
+`demo/ngao-console-demo.mp4` is a one-minute narrated walkthrough (1080p, burned-in
+captions; `demo/ngao-console-demo.srt` is the matching subtitle file). It is fully
+generated from this repository:
+
+1. `demo/narration.py` — synthesises the voiceover with Piper TTS and emits the
+   segment timeline.
+2. `demo/captions.py` — derives caption cues and the `.srt` from that timeline.
+3. `demo/record.mjs` — drives the console in Chromium on the same clock (animated
+   cursor, click ripples, brand title cards, live caption bar), capturing
+   wall-clock-timestamped frames over CDP screencast.
+4. `demo/assemble.py` — rebuilds an exactly-timed 25 fps H.264 video from those
+   frames and muxes the narration.

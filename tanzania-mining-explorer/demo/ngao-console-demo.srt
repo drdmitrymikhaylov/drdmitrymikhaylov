@@ -1,0 +1,76 @@
+1
+00:00:01,000 --> 00:00:03,465
+This is the Ngao Exploration Console
+
+2
+00:00:03,465 --> 00:00:10,390
+a mineral targeting workbench for Tanzania, developed under AD Ports Group's research and innovation programme.
+
+3
+00:00:10,590 --> 00:00:15,383
+Choose a commodity, and hyperspectral satellite imagery builds a heat map of concentration
+
+4
+00:00:15,383 --> 00:00:19,420
+reading minerals directly, and through their signature in vegetation.
+
+5
+00:00:19,620 --> 00:00:22,395
+Every ministry licence is overlaid on that surface
+
+6
+00:00:22,395 --> 00:00:24,129
+each with a passport:
+
+7
+00:00:24,129 --> 00:00:27,600
+holder, declared minerals, and what has actually been excavated.
+
+8
+00:00:27,800 --> 00:00:30,424
+Roads, railways, ports and power complete the picture;
+
+9
+00:00:30,424 --> 00:00:34,710
+a single AI score then ranks every block on the same basis.
+
+10
+00:00:34,900 --> 00:00:36,924
+The result is open ground, ranked:
+
+11
+00:00:36,924 --> 00:00:39,285
+high anomaly, best access, not yet taken
+
+12
+00:00:39,285 --> 00:00:42,670
+with a peg application drafted in one click.
+
+13
+00:00:42,870 --> 00:00:45,589
+Our own licences track the field crews
+
+14
+00:00:45,589 --> 00:00:47,143
+drilling, gravity, geophysics
+
+15
+00:00:47,143 --> 00:00:50,600
+with every geological report one click away.
+
+16
+00:00:50,810 --> 00:00:53,163
+And the laboratory queue shows the backlog
+
+17
+00:00:53,163 --> 00:00:55,179
+thousands of samples past promise
+
+18
+00:00:55,179 --> 00:00:57,210
+so nothing stalls unseen.
+
+19
+00:00:57,410 --> 00:01:00,670
+Ngao. Find the licence before anyone else does.
+
