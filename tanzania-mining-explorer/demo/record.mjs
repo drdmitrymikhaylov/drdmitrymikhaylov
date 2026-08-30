@@ -17,50 +17,52 @@ document.addEventListener('DOMContentLoaded',()=>{
   css.textContent=\`
   #demo-root{position:fixed;inset:0;z-index:500;pointer-events:none;font-family:"Archivo","Helvetica Neue",Arial,sans-serif}
   .brandcard{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;
-    background:radial-gradient(1200px 700px at 30% 20%, #0B3A5C 0%, #062A45 55%, #041D31 100%);
+    background:radial-gradient(1200px 700px at 30% 20%, #142028 0%, #0C1318 55%, #070B0E 100%);
     opacity:1;transition:opacity .7s ease;z-index:600}
   .brandcard.gone{opacity:0}
   .bc-mark{display:flex;align-items:center;gap:14px;margin-bottom:34px}
   .bc-bars{display:flex;gap:4px;align-items:flex-end}
-  .bc-bars i{width:9px;background:#19B5D5;border-radius:1px;display:block}
-  .bc-word{font-size:26px;font-weight:700;letter-spacing:.34em;color:#F2F7FA}
-  .bc-word small{display:block;font-size:11px;font-weight:500;letter-spacing:.42em;color:#8FB8CC;margin-top:6px}
-  .bc-rule{width:64px;height:2px;background:#19B5D5;margin:6px 0 30px}
+  .bc-bars i{width:9px;background:#2EE6A8;border-radius:1px;display:block}
+  .bc-word{font-size:26px;font-weight:700;letter-spacing:.30em;color:#F2FAF6}
+  .bc-word small{display:block;font-size:11px;font-weight:500;letter-spacing:.42em;color:#7FA898;margin-top:6px}
+  .bc-rule{width:64px;height:2px;background:#2EE6A8;margin:6px 0 30px}
   .bc-title{font-size:56px;font-weight:700;letter-spacing:-.015em;color:#FFFFFF;text-align:center}
-  .bc-sub{font-size:19px;font-weight:400;color:#A9C6D6;margin-top:14px;letter-spacing:.02em}
-  .bc-note{position:absolute;bottom:36px;font-size:12px;letter-spacing:.18em;color:#5E88A0;text-transform:uppercase}
+  .bc-sub{font-size:19px;font-weight:400;color:#9DB8AC;margin-top:14px;letter-spacing:.02em}
+  .bc-note{position:absolute;bottom:36px;font-size:12px;letter-spacing:.18em;color:#5E8071;text-transform:uppercase}
   #capbar{position:absolute;left:50%;bottom:34px;transform:translateX(-50%);max-width:1100px;
     display:flex;align-items:center;gap:14px;padding:13px 22px;border-radius:6px;
-    background:rgba(4,17,27,.88);border:1px solid rgba(25,181,213,.35);
+    background:rgba(4,17,27,.88);border:1px solid rgba(46,230,168,.35);
     box-shadow:0 10px 34px rgba(0,0,0,.55);opacity:0;transition:opacity .25s ease;z-index:560}
   #capbar.on{opacity:1}
-  #capbar .tag{flex:none;font-size:9.5px;font-weight:700;letter-spacing:.22em;color:#19B5D5;
-    border:1px solid rgba(25,181,213,.5);border-radius:3px;padding:3px 7px;white-space:nowrap}
+  #capbar .tag{flex:none;font-size:9.5px;font-weight:700;letter-spacing:.22em;color:#2EE6A8;
+    border:1px solid rgba(46,230,168,.5);border-radius:3px;padding:3px 7px;white-space:nowrap}
   #capbar .txt{font-size:21px;font-weight:500;color:#F4F8FA;line-height:1.35;text-align:center}
   #democur{position:absolute;left:0;top:0;z-index:640;transition:transform .55s cubic-bezier(.25,.6,.25,1);will-change:transform}
   #democur svg{filter:drop-shadow(0 2px 5px rgba(0,0,0,.6))}
-  .ripple{position:absolute;width:14px;height:14px;border-radius:50%;border:2.5px solid #19B5D5;z-index:630;
+  .ripple{position:absolute;width:14px;height:14px;border-radius:50%;border:2.5px solid #2EE6A8;z-index:630;
     animation:rip .55s ease-out forwards;pointer-events:none}
   @keyframes rip{from{transform:translate(-50%,-50%) scale(.5);opacity:.95}to{transform:translate(-50%,-50%) scale(3.4);opacity:0}}\`;
   document.head.appendChild(css);
 
   const root=document.createElement('div'); root.id='demo-root';
-  const bars=(h)=>'<span class="bc-bars">'+h.map(v=>'<i style="height:'+v+'px"></i>').join('')+'</span>';
+  const bars=()=>'<svg width="46" height="50" viewBox="0 0 46 50" aria-hidden="true">'
+    +'<path d="M23 2 43 13.5 43 36.5 23 48 3 36.5 3 13.5 Z" fill="none" stroke="#2EE6A8" stroke-width="2.4" stroke-linejoin="round"/>'
+    +'<text x="23" y="30.5" text-anchor="middle" font-family="Archivo,Arial,sans-serif" font-size="15" font-weight="700" fill="#F2FAF6" letter-spacing="1">DT</text></svg>';
   root.innerHTML=\`
     <div class="brandcard" id="card-in">
-      <div class="bc-mark">\${bars([16,26,38,30,20])}<span class="bc-word">AD PORTS GROUP<small>RESEARCH &amp; INNOVATION</small></span></div>
+      <div class="bc-mark">\${bars()}<span class="bc-word">DEEPTECH ENGINEERING<small>PHYSICS-INFORMED AI SYSTEMS</small></span></div>
       <div class="bc-rule"></div>
       <div class="bc-title">Ngao Exploration Console</div>
       <div class="bc-sub">Mineral targeting for Tanzania · hyperspectral remote sensing · tenure intelligence</div>
       <div class="bc-note">Technology demonstrator — synthetic tenure &amp; assay data</div>
     </div>
     <div class="brandcard" id="card-out" style="opacity:0">
-      <div class="bc-mark">\${bars([16,26,38,30,20])}<span class="bc-word">AD PORTS GROUP<small>RESEARCH &amp; INNOVATION</small></span></div>
+      <div class="bc-mark">\${bars()}<span class="bc-word">DEEPTECH ENGINEERING<small>PHYSICS-INFORMED AI SYSTEMS</small></span></div>
       <div class="bc-rule"></div>
       <div class="bc-title">Find the licence first.</div>
-      <div class="bc-sub">Ngao Exploration Console — a research prototype by Prof. Dr. Dmitry Mikhaylov</div>
+      <div class="bc-sub">Ngao Exploration Console — a DeepTech Engineering prototype by Prof. Dr. Dmitry Mikhaylov</div>
     </div>
-    <div id="capbar"><span class="tag">AD PORTS · R&amp;I</span><span class="txt"></span></div>
+    <div id="capbar"><span class="tag">DEEPTECH ENGINEERING</span><span class="txt"></span></div>
     <div id="democur" style="transform:translate(960px,760px)">
       <svg width="26" height="30" viewBox="0 0 26 30"><path d="M2 2 L2 24 L8.5 18.5 L12.5 27 L16.5 25 L12.5 17 L21 16 Z"
         fill="#FFFFFF" stroke="#062A45" stroke-width="1.6" stroke-linejoin="round"/></svg>

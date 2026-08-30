@@ -1,7 +1,7 @@
 import json, subprocess, wave, pathlib
 
 SEGS = [
- ("s1", "This is the Ngao Exploration Console — a mineral targeting workbench for Tanzania, developed under A.D. Ports Group's research and innovation programme."),
+ ("s1", "This is the Ngao Exploration Console — a mineral targeting workbench for Tanzania, developed by DeepTech Engineering."),
  ("s2", "Choose a commodity, and hyperspectral satellite imagery builds a heat map of concentration — reading minerals directly, and through their signature in vegetation."),
  ("s3", "Every ministry licence is overlaid on that surface — each with a passport: holder, declared minerals, and what has actually been excavated."),
  ("s4", "Roads, railways, ports and power complete the picture; a single AI score then ranks every block on the same basis."),

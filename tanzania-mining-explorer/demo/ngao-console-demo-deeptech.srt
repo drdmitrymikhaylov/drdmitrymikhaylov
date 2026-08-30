@@ -1,0 +1,76 @@
+1
+00:00:01,000 --> 00:00:03,453
+This is the Ngao Exploration Console
+
+2
+00:00:03,453 --> 00:00:08,300
+a mineral targeting workbench for Tanzania, developed by DeepTech Engineering.
+
+3
+00:00:08,500 --> 00:00:13,440
+Choose a commodity, and hyperspectral satellite imagery builds a heat map of concentration
+
+4
+00:00:13,440 --> 00:00:17,590
+reading minerals directly, and through their signature in vegetation.
+
+5
+00:00:17,800 --> 00:00:20,611
+Every ministry licence is overlaid on that surface
+
+6
+00:00:20,611 --> 00:00:22,368
+each with a passport:
+
+7
+00:00:22,368 --> 00:00:25,880
+holder, declared minerals, and what has actually been excavated.
+
+8
+00:00:26,080 --> 00:00:28,796
+Roads, railways, ports and power complete the picture;
+
+9
+00:00:28,796 --> 00:00:33,220
+a single AI score then ranks every block on the same basis.
+
+10
+00:00:33,420 --> 00:00:35,471
+The result is open ground, ranked:
+
+11
+00:00:35,471 --> 00:00:37,864
+high anomaly, best access, not yet taken
+
+12
+00:00:37,864 --> 00:00:41,290
+with a peg application drafted in one click.
+
+13
+00:00:41,490 --> 00:00:44,191
+Our own licences track the field crews
+
+14
+00:00:44,191 --> 00:00:45,734
+drilling, gravity, geophysics
+
+15
+00:00:45,734 --> 00:00:49,170
+with every geological report one click away.
+
+16
+00:00:49,370 --> 00:00:51,727
+And the laboratory queue shows the backlog
+
+17
+00:00:51,727 --> 00:00:53,747
+thousands of samples past promise
+
+18
+00:00:53,747 --> 00:00:55,780
+so nothing stalls unseen.
+
+19
+00:00:55,980 --> 00:00:59,300
+Ngao. Find the licence before anyone else does.
+

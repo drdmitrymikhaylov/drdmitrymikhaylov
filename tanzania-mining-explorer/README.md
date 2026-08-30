@@ -110,11 +110,16 @@ laboratory queues. Holder names are invented; no real company's tenure or result
 represented here. This is a working prototype of the tool, not a feed from the Mining
 Cadastre.
 
-## Demo video
+## Demo videos
 
-`demo/ngao-console-demo.mp4` is a one-minute narrated walkthrough (1080p, burned-in
-captions; `demo/ngao-console-demo.srt` is the matching subtitle file). It is fully
-generated from this repository:
+Two one-minute narrated walkthroughs (1080p, burned-in captions, matching `.srt`
+sidecars), identical apart from the brand treatment:
+
+- `demo/ngao-console-demo-deeptech.mp4` — DeepTech Engineering title cards
+  (the scripts currently produce this variant)
+- `demo/ngao-console-demo.mp4` — AD Ports Group Research & Innovation title cards
+
+Both are fully generated from this repository:
 
 1. `demo/narration.py` — synthesises the voiceover with Piper TTS and emits the
    segment timeline.
