@@ -88,8 +88,19 @@ stays on its own basemap; nothing else changes.
 | `index.html` | The whole application — standalone, openable from disk |
 | `tools/build-artifact.mjs` | Strips the document wrapper for hosts that supply their own `<head>` |
 | `dist/ngao-exploration-console.html` | Generated output of the above |
+| `dist/NgaoExplorationConsole.dmg` | macOS disk image with a double-clickable app (`tools/build-dmg.sh`) |
 
 Run `node tools/build-artifact.mjs` after editing `index.html`.
+
+### macOS disk image
+
+`tools/build-dmg.sh` (needs `xorriso` and Pillow) builds
+`dist/NgaoExplorationConsole.dmg` — an ISO9660/HFS+ hybrid image with an Apple
+Partition Map that macOS mounts like any disk image. Inside: **Ngao Exploration
+Console.app** (a launcher that opens the self-contained console in the default
+browser — works fully offline), the one-minute demo video, and a README. The
+app is not notarised, so the first launch needs right-click → Open (or
+System Settings → Privacy & Security → "Open Anyway" on newer macOS).
 
 ## What is real and what is not
 
