@@ -87,7 +87,7 @@ cp "$HERE/tools/dmg-readme.txt" "$WORK/root/README.txt"
 mkdir -p "$HERE/dist"
 xorriso -as mkisofs \
   -V "Ngao Exploration Console" \
-  -r -J -joliet-long \
+  -R -J -joliet-long \
   -hfsplus -hfsplus-serial-no 4E47414F44454550 \
   -o "$HERE/dist/NgaoExplorationConsole.dmg" \
   "$WORK/root/"
