@@ -1,0 +1,2536 @@
+<meta charset="utf-8">
+<title>Sarawat Terroir Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --paper:#ffffff; --surface:#fafbfb; --surface2:#f1f3f4; --surface3:#e8ebec;
+  --line:#e1e4e6; --line2:#cfd3d6; --line3:#b4b9be;
+  --ink:#0b0c0d; --ink2:#3c4045; --ink3:#6b7176; --ink4:#9aa0a5;
+  --mark:#0b0c0d; --grid:#e9eced; --hatch:rgba(11,12,13,.55);
+  --sea:#f3f4f5; --seaLine:#c8ccce;
+  --shadow:0 1px 2px rgba(11,12,13,.05),0 8px 28px rgba(11,12,13,.06);
+  --focus:#0b0c0d;
+  --sans:'Montserrat',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  --rail:236px; --hd:58px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0b0c0d; --surface:#121415; --surface2:#191c1e; --surface3:#212528;
+    --line:#26292c; --line2:#353a3e; --line3:#474d52;
+    --ink:#f3f5f5; --ink2:#c2c7cb; --ink3:#8b9197; --ink4:#646a70;
+    --mark:#f3f5f5; --grid:#212427; --hatch:rgba(243,245,245,.5);
+    --sea:#0d0f10; --seaLine:#242a2d;
+    --shadow:0 1px 2px rgba(0,0,0,.5),0 10px 30px rgba(0,0,0,.45);
+    --focus:#f3f5f5;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0b0c0d; --surface:#121415; --surface2:#191c1e; --surface3:#212528;
+  --line:#26292c; --line2:#353a3e; --line3:#474d52;
+  --ink:#f3f5f5; --ink2:#c2c7cb; --ink3:#8b9197; --ink4:#646a70;
+  --mark:#f3f5f5; --grid:#212427; --hatch:rgba(243,245,245,.5);
+  --sea:#0d0f10; --seaLine:#242a2d;
+  --shadow:0 1px 2px rgba(0,0,0,.5),0 10px 30px rgba(0,0,0,.45);
+  --focus:#f3f5f5;
+}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+  font-size:13px;line-height:1.5;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+h1,h2,h3,h4{margin:0;font-weight:600;letter-spacing:-.02em;text-wrap:balance}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:2px}
+::selection{background:var(--ink);color:var(--paper)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+
+/* ---------- shell ---------- */
+.app{display:grid;grid-template-columns:var(--rail) 1fr;min-height:100vh}
+@media(max-width:900px){.app{grid-template-columns:1fr}}
+
+.rail{border-right:1px solid var(--line);background:var(--surface);
+  position:sticky;top:0;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+@media(max-width:900px){.rail{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}}
+
+.brand{padding:20px 20px 16px;border-bottom:1px solid var(--line)}
+.brand .glyph{display:flex;align-items:center;gap:9px}
+.brand svg{display:block}
+.brand .wm{font-weight:800;letter-spacing:.16em;font-size:12.5px;text-transform:uppercase}
+.brand .sub{margin-top:7px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink3)}
+
+.nav{padding:10px 10px;display:flex;flex-direction:column;gap:1px;flex:1;overflow-y:auto}
+@media(max-width:900px){.nav{flex-direction:row;flex-wrap:wrap;padding:8px}}
+.navbtn{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:9px 10px;
+  background:none;border:0;cursor:pointer;border-radius:6px;color:var(--ink2);
+  font-size:12.5px;font-weight:500;letter-spacing:-.005em;transition:background .15s,color .15s}
+.navbtn:hover{background:var(--surface2);color:var(--ink)}
+.navbtn[aria-selected="true"]{background:var(--ink);color:var(--paper)}
+.navbtn[aria-selected="true"] .navk{color:var(--paper);opacity:.55}
+.navbtn svg{flex:0 0 15px;opacity:.9}
+.navk{margin-left:auto;font-family:var(--mono);font-size:9.5px;color:var(--ink4);letter-spacing:.06em}
+@media(max-width:900px){.navk{display:none}.navbtn{width:auto}}
+
+.railfoot{border-top:1px solid var(--line);padding:14px 20px 18px;font-family:var(--mono);
+  font-size:9.5px;line-height:1.7;color:var(--ink4);letter-spacing:.04em}
+@media(max-width:900px){.railfoot{display:none}}
+.railfoot b{color:var(--ink3);font-weight:500}
+
+/* ---------- header ---------- */
+.main{min-width:0;display:flex;flex-direction:column}
+.hdr{height:var(--hd);border-bottom:1px solid var(--line);display:flex;align-items:center;
+  gap:14px;padding:0 22px;position:sticky;top:0;z-index:40;
+  background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(14px) saturate(1.4)}
+.hdr h1{font-size:15px;font-weight:600;white-space:nowrap}
+.hdr .crumb{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink4);margin-right:-6px}
+.spacer{flex:1}
+.chip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border:1px solid var(--line2);
+  border-radius:6px;background:var(--paper);font-family:var(--mono);font-size:10px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink2);cursor:pointer;white-space:nowrap;transition:.15s}
+.chip:hover{border-color:var(--ink3);color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.chip .dot{width:5px;height:5px;border-radius:50%;background:var(--ink);flex:0 0 5px}
+.chip[aria-pressed="true"] .dot{background:var(--paper)}
+
+/* ---------- layout primitives ---------- */
+.view{padding:22px;display:none;flex-direction:column;gap:16px;max-width:1720px;width:100%}
+.view.on{display:flex;animation:fade .3s ease both}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.view.on{animation:none}*{transition-duration:.001s!important}}
+
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.g5{grid-template-columns:repeat(5,minmax(0,1fr))}
+.gmap{grid-template-columns:minmax(0,1fr) 360px}
+.gside{grid-template-columns:minmax(0,1fr) 400px}
+@media(max-width:1240px){.g4,.g5{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .gmap,.gside,.g3{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:760px){.g2,.g4,.g5{grid-template-columns:minmax(0,1fr)}}
+
+.panel{border:1px solid var(--line);border-radius:10px;background:var(--paper);overflow:hidden;
+  display:flex;flex-direction:column;min-width:0}
+.panel.raise{box-shadow:var(--shadow)}
+.ph{display:flex;align-items:baseline;gap:10px;padding:14px 16px 12px;border-bottom:1px solid var(--line)}
+.ph h3{font-size:12.5px;font-weight:600}
+.ph .cap{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink4)}
+.ph .right{margin-left:auto;display:flex;gap:6px;align-items:center}
+.pb{padding:16px;flex:1;min-width:0}
+.pb.tight{padding:0}
+.eyebrow{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink4)}
+
+/* ---------- stat tiles ---------- */
+.stat{padding:15px 16px 14px}
+.stat .lab{font-family:var(--mono);font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink4)}
+.stat .val{font-family:var(--mono);font-weight:600;font-size:29px;letter-spacing:-.035em;
+  line-height:1.05;margin-top:9px;font-variant-numeric:tabular-nums}
+.stat .val small{font-size:13px;font-weight:500;color:var(--ink3);letter-spacing:0;margin-left:3px}
+.stat .foot{margin-top:8px;display:flex;align-items:center;gap:7px;font-size:11px;color:var(--ink3)}
+.stat .foot .d{font-family:var(--mono);font-size:10.5px;color:var(--ink);font-weight:500}
+
+/* ---------- tables ---------- */
+table{width:100%;border-collapse:collapse}
+th{font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink4);
+  font-weight:500;text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap;
+  position:sticky;top:0;background:var(--paper);z-index:2}
+th.n,td.n{text-align:right}
+td{padding:9px 11px;border-bottom:1px solid var(--line);font-size:12px;vertical-align:middle}
+tbody tr{cursor:pointer;transition:background .12s}
+tbody tr:hover{background:var(--surface2)}
+tbody tr[aria-selected="true"]{background:var(--surface3)}
+tbody tr[aria-selected="true"] td:first-child{box-shadow:inset 3px 0 0 var(--ink)}
+.tw{overflow:auto;max-height:520px}
+.sortable{cursor:pointer;user-select:none}
+.sortable:hover{color:var(--ink)}
+.sortable .car{opacity:.35;margin-left:3px}
+.sortable[data-dir] .car{opacity:1}
+
+/* ---------- class marks (status without colour) ---------- */
+.cm{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.cm svg{flex:0 0 auto;display:block}
+.cm span{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
+.tag{display:inline-block;padding:2px 7px;border:1px solid var(--line2);border-radius:20px;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3)}
+.tag.solid{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+.meter{height:6px;background:var(--surface3);border-radius:3px;overflow:hidden;min-width:56px}
+.meter i{display:block;height:100%;background:var(--ink);border-radius:3px}
+.meter.hatched i{background:none;background-image:repeating-linear-gradient(135deg,var(--hatch) 0 2px,transparent 2px 5px)}
+
+/* ---------- map ---------- */
+.mapwrap{position:relative;background:var(--sea);min-height:440px;flex:1;overflow:hidden;
+  touch-action:none;cursor:grab}
+.mapwrap.drag{cursor:grabbing}
+.mapwrap canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.mapwrap .gmount{position:absolute;inset:0;display:none}
+.mapwrap.gmode .gmount{display:block}
+.mapwrap.gmode canvas,.mapwrap.gmode .ovl{display:none}
+.ovl{position:absolute;inset:0;pointer-events:none}
+.ovl .hit{position:absolute;pointer-events:auto;cursor:pointer;transform:translate(-50%,-50%);
+  width:26px;height:26px;display:grid;place-items:center;border-radius:50%}
+.ovl .hit:hover{background:color-mix(in srgb,var(--ink) 9%,transparent)}
+.ovl .hit.sel{background:color-mix(in srgb,var(--ink) 14%,transparent)}
+.ovl .lbl{position:absolute;transform:translate(-50%,0);font-family:var(--mono);font-size:9.5px;
+  letter-spacing:.04em;color:var(--ink);white-space:nowrap;
+  text-shadow:0 0 3px var(--paper),0 0 3px var(--paper),0 0 6px var(--paper);pointer-events:none}
+.ovl .geo{position:absolute;transform:translate(-50%,-50%);font-family:var(--mono);font-size:9px;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--ink4);white-space:nowrap;pointer-events:none;
+  text-shadow:0 0 4px var(--paper),0 0 4px var(--paper)}
+.mapctl{position:absolute;top:12px;left:12px;display:flex;flex-direction:column;gap:6px;z-index:5}
+.mapctl .row{display:flex;gap:6px}
+.mbtn{width:28px;height:28px;display:grid;place-items:center;border:1px solid var(--line2);border-radius:6px;
+  background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:blur(8px);cursor:pointer;
+  font-family:var(--mono);font-size:13px;line-height:1;color:var(--ink2);transition:.15s}
+.mbtn:hover{border-color:var(--ink3);color:var(--ink)}
+.mbtn.w{width:auto;padding:0 9px;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase}
+.mbtn[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.maplegend{position:absolute;right:12px;top:12px;z-index:5;border:1px solid var(--line);border-radius:8px;
+  background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(10px);padding:10px 12px;
+  display:flex;flex-direction:column;gap:6px;max-width:210px}
+.maplegend .t{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink4)}
+.scalebar{position:absolute;left:12px;bottom:12px;z-index:5;font-family:var(--mono);font-size:9px;
+  color:var(--ink3);letter-spacing:.06em;display:flex;flex-direction:column;gap:3px;align-items:flex-start;
+  text-shadow:0 0 4px var(--paper),0 0 4px var(--paper)}
+.scalebar .bar{height:5px;border:1px solid var(--ink3);border-top:0;width:90px}
+.maptip{position:absolute;z-index:9;pointer-events:none;border:1px solid var(--line2);border-radius:8px;
+  background:var(--paper);box-shadow:var(--shadow);padding:9px 11px;min-width:150px;opacity:0;
+  transform:translate(-50%,-118%) scale(.97);transition:opacity .12s,transform .12s}
+.maptip.on{opacity:1;transform:translate(-50%,-118%) scale(1)}
+.maptip .n{font-size:12px;font-weight:600;letter-spacing:-.01em}
+.maptip .r{display:flex;justify-content:space-between;gap:14px;font-family:var(--mono);font-size:10px;
+  color:var(--ink3);margin-top:3px}
+.maptip .r b{color:var(--ink);font-weight:500}
+.gnotice{position:absolute;inset:auto 12px 12px 12px;z-index:8;border:1px solid var(--line2);
+  border-radius:8px;background:var(--paper);padding:11px 13px;font-size:11.5px;color:var(--ink2);display:none}
+.gnotice.on{display:block}
+.gnotice b{font-weight:600;color:var(--ink)}
+
+/* ---------- charts ---------- */
+.chart{width:100%;display:block;overflow:visible}
+.chart text{font-family:var(--mono);font-size:9.5px;fill:var(--ink4);letter-spacing:.02em}
+.chart .axl{fill:var(--ink3)}
+.chart .gridline{stroke:var(--grid);stroke-width:1}
+.chart .axis{stroke:var(--line2);stroke-width:1}
+.chart .ser{fill:none;stroke:var(--mark);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.chart .ser.b{stroke-dasharray:5 3.5;stroke-width:1.75}
+.chart .area{fill:var(--mark);opacity:.09}
+.chart .dot{fill:var(--mark);stroke:var(--paper);stroke-width:2}
+.chart .dot.hollow{fill:var(--paper);stroke:var(--mark);stroke-width:1.75}
+.chart .bar{fill:var(--mark)}
+.chart .val{fill:var(--ink);font-weight:500}
+.chart .hover{fill:transparent;cursor:crosshair}
+.chart .cross{stroke:var(--ink3);stroke-width:1;stroke-dasharray:3 3}
+.legend{display:flex;flex-wrap:wrap;gap:14px;padding:0 16px 14px;font-family:var(--mono);font-size:10px;
+  color:var(--ink3);letter-spacing:.04em}
+.legend .li{display:flex;align-items:center;gap:6px}
+.tip{position:fixed;z-index:60;pointer-events:none;border:1px solid var(--line2);border-radius:8px;
+  background:var(--paper);box-shadow:var(--shadow);padding:8px 10px;font-size:11px;opacity:0;
+  transition:opacity .1s;max-width:250px}
+.tip.on{opacity:1}
+.tip .th{font-weight:600;font-size:11.5px;margin-bottom:3px}
+.tip .tr{display:flex;justify-content:space-between;gap:16px;font-family:var(--mono);font-size:10px;color:var(--ink3)}
+.tip .tr b{color:var(--ink);font-weight:500}
+
+/* ---------- detail drawer ---------- */
+.kv{display:grid;grid-template-columns:1fr auto;gap:0;border-top:1px solid var(--line)}
+.kv>div{padding:7px 0;border-bottom:1px solid var(--line);font-size:11.5px}
+.kv>div:nth-child(odd){color:var(--ink3)}
+.kv>div:nth-child(even){font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;color:var(--ink)}
+.section{padding:14px 16px;border-bottom:1px solid var(--line)}
+.section:last-child{border-bottom:0}
+.section h4{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink4);font-weight:500;margin-bottom:10px}
+
+.scoredial{display:flex;align-items:center;gap:16px}
+.scoredial .big{font-family:var(--mono);font-size:40px;font-weight:600;letter-spacing:-.05em;line-height:1}
+.scoredial .big small{font-size:14px;color:var(--ink4);letter-spacing:0}
+
+.bars{display:flex;flex-direction:column;gap:7px}
+.brow{display:grid;grid-template-columns:118px 1fr 42px;gap:10px;align-items:center;font-size:11.5px}
+.brow .bn{color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.brow .bv{font-family:var(--mono);font-size:10.5px;text-align:right;color:var(--ink)}
+.track{height:7px;background:var(--surface3);border-radius:4px;position:relative;overflow:hidden}
+.track i{position:absolute;inset:0 auto 0 0;background:var(--ink);border-radius:4px}
+.track u{position:absolute;top:-2px;bottom:-2px;width:1.5px;background:var(--ink3);opacity:.7}
+
+/* ---------- controls ---------- */
+.ctlrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:7px;overflow:hidden;background:var(--paper)}
+.seg button{border:0;background:none;padding:6px 11px;cursor:pointer;font-family:var(--mono);font-size:10px;
+  letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);border-right:1px solid var(--line);transition:.15s}
+.seg button:last-child{border-right:0}
+.seg button:hover{color:var(--ink);background:var(--surface2)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink4)}
+select,input[type=text],input[type=search]{border:1px solid var(--line2);border-radius:7px;background:var(--paper);
+  padding:7px 10px;font-size:12px;min-width:120px}
+input[type=range]{-webkit-appearance:none;appearance:none;height:3px;background:var(--line2);border-radius:2px;
+  width:100%;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;
+  background:var(--paper);border:2px solid var(--ink);cursor:grab}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--paper);
+  border:2px solid var(--ink);cursor:grab}
+.wrow{display:grid;grid-template-columns:150px 1fr 46px;gap:12px;align-items:center;padding:6px 0}
+.wrow .wn{font-size:12px;color:var(--ink2)}
+.wrow .wv{font-family:var(--mono);font-size:11px;text-align:right;color:var(--ink)}
+
+.pill{border:1px solid var(--line2);border-radius:7px;padding:8px 11px;display:flex;gap:9px;align-items:flex-start;
+  font-size:11.5px;color:var(--ink2);line-height:1.45;background:var(--surface)}
+.pill .ic{flex:0 0 auto;margin-top:1px}
+.note{font-size:11px;color:var(--ink4);line-height:1.55}
+.divider{height:1px;background:var(--line);margin:2px 0}
+
+/* phenology */
+.phen{overflow-x:auto}
+.phen table{min-width:560px}
+.phen td.c{padding:0;height:26px;min-width:40px;border-left:1px solid var(--line)}
+.phen .cell{height:26px;display:grid;place-items:center;font-family:var(--mono);font-size:9px;color:var(--ink4)}
+.phen th.m{text-align:center;font-size:9px}
+.phen td.rn{font-size:11.5px;color:var(--ink2);white-space:nowrap;width:1%}
+
+.hl{background:var(--surface2);border-radius:6px;padding:2px 6px;font-family:var(--mono);font-size:11px}
+a{color:var(--ink);text-underline-offset:3px}
+.sronly{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+
+<div class="app">
+  <aside class="rail">
+    <div class="brand">
+      <div class="glyph">
+        <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true">
+          <path d="M1 17 L6.5 7 L11 13 L15 5.5 L21 17" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+          <circle cx="15" cy="5.5" r="2.1" fill="none" stroke="currentColor" stroke-width="1.4"/>
+        </svg>
+        <span class="wm">Sarawat</span>
+      </div>
+      <div class="sub">Terroir Engine v4.2</div>
+    </div>
+
+    <nav class="nav" role="tablist" aria-label="Sections" id="nav"></nav>
+
+    <div class="railfoot">
+      <div><b>Operator</b> Saudi Coffee Co.</div>
+      <div><b>Crop year</b> 2025/26</div>
+      <div><b>Model</b> TerroirMatch v4.2</div>
+      <div><b>Refreshed</b> 29 Aug 2026</div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="hdr">
+      <span class="crumb" id="crumb">Operations</span>
+      <h1 id="vtitle">Portfolio overview</h1>
+      <div class="spacer"></div>
+      <button class="chip" id="unitBtn" aria-pressed="false" title="Toggle yield units">
+        <span class="dot"></span><span id="unitLbl">kg/ha</span>
+      </button>
+      <button class="chip" id="themeBtn" title="Switch appearance">
+        <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.2" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M6 1.8a4.2 4.2 0 0 0 0 8.4z" fill="currentColor"/></svg>
+        <span id="themeLbl">Auto</span>
+      </button>
+    </header>
+
+    <!-- ============ 1. OPERATIONS ============ -->
+    <section class="view" id="v-ops" role="tabpanel" aria-labelledby="t-ops">
+      <div class="grid g5" id="opsKpi"></div>
+
+      <div class="grid gmap">
+        <div class="panel raise" style="min-height:520px">
+          <div class="ph">
+            <h3>Estate network</h3><span class="cap">Kingdom of Saudi Arabia</span>
+            <div class="right">
+              <div class="seg" id="opsLayer">
+                <button data-layer="relief" aria-pressed="true">Relief</button>
+                <button data-layer="score">AI score</button>
+                <button data-layer="water">Water stress</button>
+              </div>
+            </div>
+          </div>
+          <div class="mapwrap" id="map-ops" data-scope="ksa"></div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+          <div class="panel">
+            <div class="ph"><h3>Production by estate</h3><span class="cap">2025 harvest</span></div>
+            <div class="pb" id="opsEstateBars"></div>
+          </div>
+          <div class="panel">
+            <div class="ph"><h3>Field alerts</h3><span class="cap">Live</span></div>
+            <div class="pb" id="opsAlerts" style="display:flex;flex-direction:column;gap:8px"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid g2">
+        <div class="panel">
+          <div class="ph"><h3>Kingdom green-bean output</h3><span class="cap">Tonnes, 2015 – 2025</span>
+            <div class="right"><span class="eyebrow" id="opsCagr"></span></div></div>
+          <div class="pb" id="opsTrend"></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><h3>Water balance by estate</h3><span class="cap">mm · crop year</span></div>
+          <div class="pb" id="opsWater"></div>
+          <div class="legend">
+            <span class="li"><svg width="12" height="8"><rect width="12" height="8" fill="var(--mark)"/></svg>Effective rain + dew</span>
+            <span class="li"><svg width="12" height="8"><rect width="12" height="8" fill="none" stroke="var(--mark)" stroke-width="1"/><path d="M0 8L12 -4M-4 8L8 -4M4 12L16 0" stroke="var(--mark)" stroke-width="1"/></svg>Irrigation requirement</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="ph"><h3>Estate register</h3><span class="cap">8 producing sites · click a row for detail</span>
+          <div class="right"><input type="search" id="opsSearch" placeholder="Filter estates…" aria-label="Filter estates"></div></div>
+        <div class="tw" id="opsTable"></div>
+      </div>
+    </section>
+
+    <!-- ============ 2. EXPANSION ============ -->
+    <section class="view" id="v-exp" role="tabpanel" aria-labelledby="t-exp">
+      <div class="grid g4" id="expKpi"></div>
+
+      <div class="panel">
+        <div class="ph"><h3>Screening filters</h3><span class="cap">Applied to 20 Saudi parcels</span>
+          <div class="right"><button class="chip" id="expReset">Reset</button></div></div>
+        <div class="pb">
+          <div class="ctlrow" style="gap:18px">
+            <div class="field"><label for="fMinScore">Min AI score <span class="mono" id="fMinScoreV">0</span></label>
+              <input type="range" id="fMinScore" min="0" max="90" value="0" step="1" style="width:150px"></div>
+            <div class="field"><label for="fElev">Min elevation <span class="mono" id="fElevV">0 m</span></label>
+              <input type="range" id="fElev" min="0" max="2400" value="0" step="50" style="width:150px"></div>
+            <div class="field"><label for="fWater">Max irrigation need <span class="mono" id="fWaterV">any</span></label>
+              <input type="range" id="fWater" min="200" max="900" value="900" step="10" style="width:150px"></div>
+            <div class="field"><label for="fRegion">Region</label>
+              <select id="fRegion"><option value="">All regions</option></select></div>
+            <div class="field"><label for="fStatus">Status</label>
+              <select id="fStatus">
+                <option value="">Established + candidate</option>
+                <option value="candidate">Candidate only</option>
+                <option value="established">Established only</option>
+              </select></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid gmap">
+        <div class="panel raise" style="min-height:600px">
+          <div class="ph">
+            <h3>Terroir match map</h3><span class="cap">Yemen reference belt + Saudi parcels</span>
+            <div class="right">
+              <div class="seg" id="expLayer">
+                <button data-layer="relief" aria-pressed="true">Relief</button>
+                <button data-layer="score">AI score</button>
+                <button data-layer="analogue">Analogue links</button>
+              </div>
+            </div>
+          </div>
+          <div class="mapwrap" id="map-exp" data-scope="both"></div>
+        </div>
+        <div class="panel" id="expDetail" style="min-width:0"></div>
+      </div>
+
+      <div class="grid g2">
+        <div class="panel">
+          <div class="ph"><h3>Ranked recommendations</h3><span class="cap">TerroirMatch v4.2</span></div>
+          <div class="pb" id="expRank"></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><h3>Elevation vs. suitability</h3><span class="cap">All parcels · bubble = plantable hectares</span></div>
+          <div class="pb" id="expScatter"></div>
+          <div class="legend">
+            <span class="li"><svg width="11" height="11"><circle cx="5.5" cy="5.5" r="4" fill="var(--mark)"/></svg>Yemen champion</span>
+            <span class="li"><svg width="11" height="11"><circle cx="5.5" cy="5.5" r="4" fill="none" stroke="var(--mark)" stroke-width="1.5"/></svg>Saudi parcel</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="ph"><h3>Recommendation register</h3><span class="cap">Sortable · click a row to inspect</span></div>
+        <div class="tw" id="expTable"></div>
+      </div>
+    </section>
+
+    <!-- ============ 3. YEMEN ============ -->
+    <section class="view" id="v-ymn" role="tabpanel" aria-labelledby="t-ymn">
+      <div class="grid g4" id="ymnKpi"></div>
+
+      <div class="grid gmap">
+        <div class="panel raise" style="min-height:560px">
+          <div class="ph"><h3>Reference belt</h3><span class="cap">12 heritage growing districts</span>
+            <div class="right"><div class="seg" id="ymnLayer">
+              <button data-layer="relief" aria-pressed="true">Relief</button>
+              <button data-layer="score">Cup score</button>
+              <button data-layer="yield">Yield</button>
+            </div></div>
+          </div>
+          <div class="mapwrap" id="map-ymn" data-scope="yem"></div>
+        </div>
+        <div class="panel" id="ymnDetail" style="min-width:0"></div>
+      </div>
+
+      <div class="grid g2">
+        <div class="panel">
+          <div class="ph"><h3>Historical yield</h3><span class="cap">kg green bean / ha · 2015 – 2025</span>
+            <div class="right"><div class="seg" id="ymnYieldMode">
+              <button data-m="belt" aria-pressed="true">Belt mean</button>
+              <button data-m="sel">Selected district</button>
+              <button data-m="all">All districts</button>
+            </div></div>
+          </div>
+          <div class="pb" id="ymnYield"></div>
+          <div class="legend" id="ymnYieldLegend"></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><h3>Champion league</h3><span class="cap">Cup score vs. altitude</span></div>
+          <div class="pb" id="ymnChampions"></div>
+        </div>
+      </div>
+
+      <div class="grid g2">
+        <div class="panel">
+          <div class="ph"><h3>Water &amp; sun regime</h3><span class="cap">Selected district · monthly</span></div>
+          <div class="pb" id="ymnClimate"></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><h3>District register</h3><span class="cap">Yemen reference belt</span></div>
+          <div class="tw" id="ymnTable" style="max-height:360px"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 4. TERROIR ============ -->
+    <section class="view" id="v-ter" role="tabpanel" aria-labelledby="t-ter">
+      <div class="panel">
+        <div class="ph"><h3>Pair comparison</h3><span class="cap">Saudi parcel against Yemen reference</span></div>
+        <div class="pb">
+          <div class="ctlrow" style="gap:18px">
+            <div class="field"><label for="terA">Saudi parcel</label><select id="terA" style="min-width:220px"></select></div>
+            <div class="field"><label for="terB">Yemen reference</label><select id="terB" style="min-width:220px"></select></div>
+            <div class="field"><label>Overall similarity</label>
+              <div class="mono" id="terSim" style="font-size:22px;font-weight:600;letter-spacing:-.03em">—</div></div>
+            <div class="field"><label>Auto-matched analogue</label>
+              <div id="terAuto" style="font-size:12px;font-weight:500">—</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid gside">
+        <div class="panel">
+          <div class="ph"><h3>Terroir fingerprint</h3><span class="cap">11 normalised factors</span></div>
+          <div class="pb" id="terRadar"></div>
+          <div class="legend">
+            <span class="li"><svg width="18" height="8"><path d="M0 4H18" stroke="var(--mark)" stroke-width="2"/></svg><span id="terLegA">Saudi parcel</span></span>
+            <span class="li"><svg width="18" height="8"><path d="M0 4H18" stroke="var(--mark)" stroke-width="1.75" stroke-dasharray="5 3.5"/></svg><span id="terLegB">Yemen reference</span></span>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="ph"><h3>Factor-by-factor gap</h3><span class="cap">Signed difference</span></div>
+          <div class="pb" id="terGap"></div>
+        </div>
+      </div>
+
+      <div class="grid g3">
+        <div class="panel"><div class="ph"><h3>Water</h3><span class="cap">Supply &amp; demand</span></div><div class="pb" id="terWater"></div></div>
+        <div class="panel"><div class="ph"><h3>Sun &amp; heat</h3><span class="cap">Radiation load</span></div><div class="pb" id="terSun"></div></div>
+        <div class="panel"><div class="ph"><h3>Soil &amp; slope</h3><span class="cap">Root-zone conditions</span></div><div class="pb" id="terSoil"></div></div>
+      </div>
+
+      <div class="panel">
+        <div class="ph"><h3>Monthly climate, side by side</h3><span class="cap">Modelled 30-year normals</span></div>
+        <div class="pb" id="terMonthly"></div>
+      </div>
+    </section>
+
+    <!-- ============ 5. CROP CYCLE ============ -->
+    <section class="view" id="v-cyc" role="tabpanel" aria-labelledby="t-cyc">
+      <div class="panel">
+        <div class="ph"><h3>Vegetation cycle</h3><span class="cap">Coffea arabica · Sarawat highland regime</span>
+          <div class="right">
+            <div class="seg" id="cycRegime">
+              <button data-r="ksa" aria-pressed="true">Saudi (Jazan / Asir)</button>
+              <button data-r="yem">Yemen (Sana'a highlands)</button>
+            </div>
+          </div>
+        </div>
+        <div class="pb tight phen" id="cycPhen"></div>
+      </div>
+
+      <div class="grid g2">
+        <div class="panel">
+          <div class="ph"><h3>Irrigation requirement</h3><span class="cap">mm / month · selected parcel</span>
+            <div class="right"><select id="cycSite" style="min-width:200px"></select></div></div>
+          <div class="pb" id="cycIrr"></div>
+          <div class="legend">
+            <span class="li"><svg width="12" height="8"><rect width="12" height="8" fill="var(--mark)" opacity=".85"/></svg>Crop water demand ETc</span>
+            <span class="li"><svg width="12" height="8"><rect width="12" height="8" fill="none" stroke="var(--mark)"/></svg>Effective rainfall</span>
+            <span class="li"><svg width="16" height="8"><path d="M0 4H16" stroke="var(--mark)" stroke-width="1.6" stroke-dasharray="4 3"/></svg>Net irrigation</span>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="ph"><h3>Input &amp; labour calendar</h3><span class="cap">Per hectare</span></div>
+          <div class="pb" id="cycInputs"></div>
+        </div>
+      </div>
+
+      <div class="grid g2">
+        <div class="panel">
+          <div class="ph"><h3>Pest &amp; disease pressure window</h3><span class="cap">Modelled risk index 0 – 100</span></div>
+          <div class="pb tight phen" id="cycPest"></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><h3>Stage requirements</h3><span class="cap">What the crop needs, when</span></div>
+          <div class="pb" id="cycStages" style="display:flex;flex-direction:column;gap:9px"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 6. MODEL ============ -->
+    <section class="view" id="v-mdl" role="tabpanel" aria-labelledby="t-mdl">
+      <div class="grid gside">
+        <div class="panel">
+          <div class="ph"><h3>Scoring weights</h3><span class="cap">Live — every score in the tool recomputes</span>
+            <div class="right"><button class="chip" id="mdlReset">Restore defaults</button></div></div>
+          <div class="pb" id="mdlWeights"></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><h3>Ranking response</h3><span class="cap">Top 10 parcels under current weights</span></div>
+          <div class="pb" id="mdlRank"></div>
+        </div>
+      </div>
+
+      <div class="grid g3">
+        <div class="panel"><div class="ph"><h3>Suitability bands</h3><span class="cap">How a score becomes a verdict</span></div>
+          <div class="pb" id="mdlBands"></div></div>
+        <div class="panel"><div class="ph"><h3>Ideal envelopes</h3><span class="cap">Agronomic tolerance windows</span></div>
+          <div class="pb tight"><div class="tw" id="mdlEnv" style="max-height:none"></div></div></div>
+        <div class="panel"><div class="ph"><h3>Confidence</h3><span class="cap">Evidence behind each score</span></div>
+          <div class="pb" id="mdlConf"></div></div>
+      </div>
+
+      <div class="panel">
+        <div class="ph"><h3>Method</h3><span class="cap">Read before you plant</span></div>
+        <div class="pb" id="mdlMethod"></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="tip" id="tip" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+/* =====================================================================
+   SARAWAT TERROIR ENGINE — data layer
+   Sites are real growing districts; agronomic values are modelled
+   estimates for demonstration, not survey measurements.
+   ===================================================================== */
+
+const F = ["elev","rain","diurnal","water","temp","soil","sun","slope","frost","heat","access"];
+const FLABEL = {
+  elev:"Elevation", rain:"Natural rainfall", diurnal:"Diurnal range", water:"Water security",
+  temp:"Mean temperature", soil:"Soil quality", sun:"Sunlight regime", slope:"Slope & drainage",
+  frost:"Frost freedom", heat:"Heat-stress freedom", access:"Access & labour"
+};
+const FSHORT = {
+  elev:"Elevation", rain:"Rainfall", diurnal:"Diurnal", water:"Water", temp:"Temp",
+  soil:"Soil", sun:"Sunlight", slope:"Slope", frost:"Frost", heat:"Heat", access:"Access"
+};
+const FUNIT = {
+  elev:"m", rain:"mm/yr", diurnal:"°C", water:"index", temp:"°C", soil:"index",
+  sun:"h/yr", slope:"%", frost:"nights", heat:"days >32°C", access:"index"
+};
+const DEFAULT_W = {elev:.14, rain:.13, diurnal:.12, water:.12, temp:.10, soil:.10,
+                   sun:.08, slope:.07, frost:.05, heat:.05, access:.04};
+/* envelope: [hardLow, idealLow, idealHigh, hardHigh] */
+const ENV = {
+  elev:[1000,1600,2200,2600], rain:[200,850,1700,2300], diurnal:[9,14,18,23],
+  water:[25,75,150,240],  temp:[15,18.5,22,25],  soil:[25,72,150,240],
+  sun:[2400,2650,3050,3450], slope:[3,12,40,62], frost:[-1,0,2,12],
+  heat:[-1,0,6,30], access:[20,72,150,240]
+};
+const LOWER_BETTER = new Set(["frost","heat"]);
+
+/* raw columns:
+   0 id 1 name 2 admin 3 country 4 status 5 lat 6 lon 7 elev 8 rain 9 diurnal
+   10 tmean 11 slope 12 aspect 13 pH 14 soilDepth 15 waterIdx 16 sun 17 fogDays
+   18 frostNights 19 heatDays 20 accessIdx 21 labourIdx 22 hectares 23 holdings
+   24 dataQuality 25 cupScore 26 varieties 27 process 28 note                    */
+const RAW = [
+/* --- Yemen reference belt ------------------------------------------------ */
+["ym-mat","Bani Matar","Sana'a","YE","champion",15.30,44.00,2200,560,16,18.5,34,"NE",6.2,60,58,3050,40,6,2,42,78,3100,4200,.88,89.5,"Udaini · Tuffahi","Natural (dry)","Origin of Mocha Mattari; 400-year stone terraces on basalt."],
+["ym-har","Haraz","Sana'a","YE","champion",15.08,43.74,2050,690,15,19.4,40,"E",6.0,55,64,2950,62,3,4,38,82,2650,3600,.90,90.5,"Udaini · Dawairi","Natural (dry)","Jabal Haraz — the belt's benchmark for aromatic intensity."],
+["ym-bur","Bura'a","Al Hudaydah","YE","champion",14.92,43.42,1500,820,13,22.0,45,"W",5.8,70,71,2780,88,0,22,30,74,1450,2100,.74,86.0,"Dawairi","Natural (dry)","Cloud-forest microclimate; highest natural moisture in the belt."],
+["ym-ism","Bani Ismail","Sana'a","YE","champion",15.42,43.88,2300,520,17,17.8,36,"N",6.3,50,54,3100,32,9,1,40,76,1900,2600,.83,89.0,"Ismaili","Natural (dry)","Small-bean Ismaili type; extreme altitude, very slow ripening."],
+["ym-hay","Al Haymah","Sana'a","YE","champion",15.12,44.06,2150,540,16,18.8,32,"NE",6.1,58,56,3020,36,5,2,46,72,2200,3000,.85,88.0,"Udaini","Natural (dry)","Consistent producer; best road access in the highland belt."],
+["ym-kha","Khawlan","Sana'a","YE","champion",15.28,44.46,2280,480,18,17.9,28,"E",6.4,48,49,3150,24,11,1,52,70,1750,2400,.80,87.5,"Tuffahi","Natural (dry)","Driest champion; spring-fed supplementary irrigation."],
+["ym-ray","Raymah","Raymah","YE","champion",14.72,43.62,1750,760,14,20.9,47,"SW",5.9,65,68,2850,74,0,12,28,80,1600,2500,.72,87.0,"Dawairi","Natural (dry)","Steepest terraces in the survey; near-inaccessible by vehicle."],
+["ym-uda","Udain","Ibb","YE","champion",13.96,43.93,1650,900,13,21.4,38,"S",5.7,75,74,2720,82,0,16,44,84,2400,3800,.82,86.5,"Udaini","Natural · washed trial","Wettest district; deepest soils, highest tree density."],
+["ym-yaf","Yafa'","Lahj","YE","champion",13.86,45.62,1900,460,19,20.2,42,"NE",6.5,45,44,3200,18,4,9,22,66,1200,1700,.66,88.5,"Yafa'i","Natural (dry)","Isolated eastern outlier; distinctive Yafa'i cup profile."],
+["ym-sad","Razih (Sa'dah)","Sa'dah","YE","champion",16.83,43.42,2000,590,17,19.0,44,"W",6.2,52,57,3080,44,6,5,26,72,1350,1900,.68,87.0,"Udaini","Natural (dry)","Northernmost champion — closest analogue to Saudi Jazan."],
+["ym-ani","Anis","Dhamar","YE","champion",14.62,44.18,2350,500,18,17.2,30,"NE",6.3,46,50,3120,28,14,0,50,68,1500,2000,.79,88.0,"Anisi","Natural (dry)","Highest mean altitude; frost limits the upper planting line."],
+["ym-mah","Al Mahwit","Al Mahwit","YE","champion",15.47,43.55,1950,700,15,19.8,46,"NW",6.0,58,66,2900,58,2,6,34,79,1800,2700,.77,88.5,"Udaini · Dawairi","Natural (dry)","Escarpment fog belt; strong yield stability year to year."],
+
+/* --- Saudi Arabia · producing estates ------------------------------------ */
+["sa-day","Al Dayer Bani Malik","Jazan","SA","established",17.42,43.05,1750,420,14,21.0,40,"NE",6.3,50,72,3050,46,1,14,78,55,640,1750,.94,86.5,"Khawlani","Natural · washed","Heart of the Khawlani coffee heritage area; flagship estate."],
+["sa-fif","Fifa Mountains","Jazan","SA","established",17.25,43.12,1600,450,13,22.1,55,"E",6.1,45,70,2980,58,0,19,66,58,480,1420,.92,86.0,"Khawlani","Natural","Terraced granite domes; humidity from the Tihama updraft."],
+["sa-rei","Ar Rayth","Jazan","SA","established",17.20,42.90,1350,380,14,23.4,38,"W",6.4,42,66,3100,40,0,30,74,52,300,760,.90,83.5,"Khawlani","Washed","Lower belt — heat days now the binding constraint."],
+["sa-ari","Al Aridah","Jazan","SA","established",17.05,43.10,1450,400,14,22.8,42,"NE",6.2,44,68,3060,44,0,26,70,54,360,980,.89,84.5,"Khawlani","Natural","Mixed with mango and citrus; shade canopy already mature."],
+["sa-har","Harub","Jazan","SA","established",17.55,43.02,1900,430,15,20.2,36,"N",6.3,48,69,3080,42,2,9,72,53,420,1100,.91,87.0,"Khawlani","Natural","Highest producing block in the Kingdom; best current cup."],
+["sa-rij","Rijal Almaa","Asir","SA","established",18.19,42.28,1550,340,15,22.6,50,"W",6.5,40,62,3120,52,0,24,80,50,260,640,.88,84.0,"Khawlani · Typica","Washed","Heritage terraces restored under the Asir agri-tourism plan."],
+["sa-bal","Balqarn","Asir","SA","established",19.30,42.05,1850,300,16,20.8,34,"NE",6.6,38,58,3180,30,3,12,76,46,190,430,.85,84.5,"Typica","Washed","Newest producing district; young trees not yet at full bearing."],
+["sa-mik","Al Mikhwah","Al Bahah","SA","established",19.93,41.43,1500,280,15,23.0,44,"W",6.7,36,55,3200,34,0,28,82,44,150,320,.83,82.5,"Typica","Washed","Marginal north edge — retained for research, not expansion."],
+
+/* --- Saudi Arabia · candidate parcels ------------------------------------ */
+["ca-qah","Jabal Al Qahar","Jazan","SA","candidate",17.35,43.15,2050,460,15,19.6,45,"NE",6.2,48,66,3020,56,2,6,58,50,880,0,.86,null,"Khawlani (proposed)","—","Highest-scoring greenfield; near-identical envelope to Haraz."],
+["ca-faS","Jabal Fayfa South","Jazan","SA","candidate",17.18,43.08,1700,470,14,21.3,58,"NE",6.1,47,71,2960,60,0,15,64,52,540,0,.87,null,"Khawlani (proposed)","—","Slope is extreme — terrace rebuild is the whole capex case."],
+["ca-laj","Wadi Lajab","Jazan","SA","candidate",17.52,43.01,1150,520,12,24.2,60,"N",6.0,55,82,2820,78,0,38,54,48,240,0,.78,null,"Robusta / Liberica trial","—","Perennial water, but too warm for arabica below 1,300 m."],
+["ca-sou","As Sudah","Asir","SA","candidate",18.27,42.37,2500,380,16,15.9,42,"N",6.4,42,60,3060,68,12,0,84,48,610,0,.84,null,"Typica · Geisha trial","—","Cool-limited: excellent cup ceiling, real frost exposure."],
+["ca-ban","Bani Amr escarpment","Asir","SA","candidate",18.45,42.15,1900,400,15,20.4,52,"W",6.3,46,64,3040,62,1,10,68,47,720,0,.85,null,"Khawlani (proposed)","—","Fog-belt escarpment; the strongest Asir candidate."],
+["ca-tan","Tanumah","Asir","SA","candidate",18.99,42.19,2200,330,17,18.2,48,"W",6.5,40,57,3140,46,7,2,78,45,560,0,.82,null,"Typica","—","Good envelope, thin soils — needs organic matter build-up."],
+["ca-nam","Al Namas ridge","Asir","SA","candidate",19.14,42.13,2350,320,17,17.4,40,"NE",6.6,38,55,3160,40,10,1,80,44,430,0,.81,null,"Typica","—","Altitude buys quality; frost nights cap the planting line."],
+["ca-sar","Sarat Abidah","Asir","SA","candidate",18.20,42.80,2150,260,19,18.6,22,"E",7.0,34,46,3260,14,8,3,86,42,950,0,.80,null,"Typica","—","Plateau interior — alkaline, dry, exposed. Fully irrigated only."],
+["ca-bja","Baljurashi terraces","Al Bahah","SA","candidate",19.86,41.57,2000,290,16,19.7,38,"NE",6.6,40,56,3170,36,4,6,84,45,470,0,.83,null,"Typica","—","Abandoned stone terraces — rehabilitation, not construction."],
+["ca-shi","Wadi Bani Shihr","Al Bahah","SA","candidate",19.72,41.75,1800,300,16,20.6,42,"N",6.5,44,59,3120,38,2,8,76,46,380,0,.82,null,"Typica","—","Sheltered wadi with alluvial depth; modest but reliable."],
+["ca-hab","Habuna","Najran","SA","candidate",17.75,44.05,1650,210,20,21.8,20,"E",7.3,30,38,3320,8,3,34,72,40,1200,0,.71,null,"—","—","Rejected: alkaline, arid, no fog. Included to show the floor."],
+["ca-taf","Ash Shafa (Taif)","Makkah","SA","candidate",21.07,40.31,2100,240,18,18.9,30,"NE",6.9,36,52,3240,22,6,5,90,50,690,0,.80,null,"Typica · Bourbon trial","—","Best logistics in the Kingdom; water is the whole question."]
+];
+
+const KEY = ["id","name","admin","country","status","lat","lon","elev","rain","diurnal","tmean",
+  "slope","aspect","ph","depth","waterIdx","sun","fog","frost","heat","access","labour","ha",
+  "holdings","dataQ","cup","variety","process","note"];
+
+const SITES = RAW.map(r => { const o={}; KEY.forEach((k,i)=>o[k]=r[i]); return o; });
+const byId = Object.fromEntries(SITES.map(s=>[s.id,s]));
+
+/* --- historical yield, kg green bean / ha, 2015 – 2025 ------------------- */
+const YEARS = [2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025];
+/* Yemen: conflict-suppressed 2015-18, partial recovery, 2021 drought dip. */
+const YEM_SHAPE = [1.00,.86,.74,.71,.79,.88,.81,.93,.97,1.02,1.05];
+/* Saudi: Vision-2030 investment ramp; 2019 replanting dip at young estates. */
+const KSA_SHAPE = [.62,.66,.71,.74,.72,.81,.88,.95,1.02,1.10,1.18];
+const BASE_YIELD = {
+  "ym-mat":410,"ym-har":455,"ym-bur":390,"ym-ism":355,"ym-hay":400,"ym-kha":340,
+  "ym-ray":365,"ym-uda":430,"ym-yaf":300,"ym-sad":330,"ym-ani":345,"ym-mah":385,
+  "sa-day":720,"sa-fif":665,"sa-rei":540,"sa-ari":585,"sa-har":760,
+  "sa-rij":505,"sa-bal":430,"sa-mik":365
+};
+function jitter(seed){ let x=Math.sin(seed*12.9898)*43758.5453; return x-Math.floor(x); }
+const YIELD = {};
+SITES.forEach((s,si)=>{
+  if(!(s.id in BASE_YIELD)) return;
+  const shape = s.country==="YE" ? YEM_SHAPE : KSA_SHAPE;
+  YIELD[s.id] = shape.map((f,i)=> Math.round(BASE_YIELD[s.id]*f*(0.94+0.12*jitter(si*7+i*3))));
+});
+
+/* --- vegetation cycle ---------------------------------------------------- */
+const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+/* intensity 0-3 per month */
+const PHENOLOGY = {
+  ksa:[
+    ["Vegetative flush",        [0,1,3,3,2,1,1,2,2,1,0,0]],
+    ["Flowering",               [0,0,2,3,2,0,0,1,0,0,0,0]],
+    ["Pin-head / fruit set",    [0,0,0,1,3,3,1,0,0,0,0,0]],
+    ["Bean expansion",          [0,0,0,0,1,3,3,3,1,0,0,0]],
+    ["Bean filling",            [0,0,0,0,0,0,2,3,3,2,0,0]],
+    ["Ripening",                [1,0,0,0,0,0,0,0,2,3,3,2]],
+    ["Harvest",                 [2,1,0,0,0,0,0,0,0,2,3,3]],
+    ["Drying / patio",          [3,2,0,0,0,0,0,0,0,1,2,3]],
+    ["Pruning & stumping",      [1,3,2,0,0,0,0,0,0,0,0,0]],
+    ["Fertigation",             [0,1,3,3,2,3,3,2,1,0,0,0]],
+    ["Peak irrigation",         [1,2,3,3,3,3,2,2,2,1,1,1]],
+    ["Shade management",        [0,2,2,0,0,1,1,0,0,0,0,0]]
+  ],
+  yem:[
+    ["Vegetative flush",        [0,0,2,3,3,1,1,2,2,1,0,0]],
+    ["Flowering",               [0,0,1,3,3,1,0,1,0,0,0,0]],
+    ["Pin-head / fruit set",    [0,0,0,1,2,3,2,0,0,0,0,0]],
+    ["Bean expansion",          [0,0,0,0,0,2,3,3,2,0,0,0]],
+    ["Bean filling",            [0,0,0,0,0,0,1,3,3,2,1,0]],
+    ["Ripening",                [2,1,0,0,0,0,0,0,1,3,3,3]],
+    ["Harvest",                 [3,2,0,0,0,0,0,0,0,1,3,3]],
+    ["Drying on rooftops",      [3,3,1,0,0,0,0,0,0,0,2,3]],
+    ["Pruning & stumping",      [1,3,3,0,0,0,0,0,0,0,0,0]],
+    ["Manuring (terrace)",      [0,2,3,2,0,0,0,2,1,0,0,0]],
+    ["Spate / spring watering", [0,0,1,2,2,1,1,1,1,0,0,0]],
+    ["Terrace wall repair",     [2,3,1,0,0,0,0,0,1,2,1,0]]
+  ]
+};
+const PEST = [
+  ["Coffee berry borer",   [45,30,18,15,22,38,58,72,80,74,62,52]],
+  ["Coffee leaf rust",     [22,18,26,40,52,66,74,80,70,52,36,28]],
+  ["Mealybug / scale",     [30,34,44,52,58,50,42,38,34,30,26,26]],
+  ["Root-knot nematode",   [18,20,28,36,44,50,48,44,38,30,24,20]],
+  ["Antestia bug",         [12,14,22,34,46,54,50,40,30,22,16,12]],
+  ["Heat / drought stress",[20,26,42,58,72,84,88,80,62,40,26,20]]
+];
+const STAGE_NEEDS = [
+  ["Flowering","Mar – May","A sharp dry spell followed by 25–40 mm of rain or a controlled irrigation pulse. Water applied too early splits the blossom set across weeks and wrecks harvest uniformity."],
+  ["Pin-head","May – Jun","No moisture deficit. This is the single most drop-sensitive window: 10 days of stress here costs more yield than a month of stress at any other stage."],
+  ["Bean expansion","Jun – Aug","Peak ETc, 120–150 mm/month. Nitrogen and potassium split across three fertigations; boron for cell-wall integrity."],
+  ["Bean filling","Aug – Oct","Steady moisture, strong diurnal swing. Cool nights below 16 °C build the sugars and acids that carry the cup score."],
+  ["Ripening","Oct – Nov","Taper irrigation by roughly a third. Too much water now dilutes the cherry and delays colour break."],
+  ["Harvest","Oct – Jan","Dry mornings for selective picking. Three to five passes; single-pass stripping costs 4–6 cup points."],
+  ["Post-harvest","Jan – Feb","Raised beds, 11–12 % final moisture. Rooftop drying in Yemen; shaded raised beds in Jazan to avoid Tihama dust."],
+  ["Pruning","Feb – Mar","Cycle-prune a quarter of the block per year. Remove verticals, open the canopy centre, and stump trees older than 18 years."]
+];
+</script>
+
+<script>
+"use strict";
+/* =====================================================================
+   Scoring engine
+   ===================================================================== */
+const W = Object.assign({}, DEFAULT_W);
+
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+const lerp=(a,b,t)=>a+(b-a)*t;
+function trap(v,[a,b,c,d]){ if(v<=a||v>=d) return 0; if(v>=b&&v<=c) return 1;
+  return v<b ? (v-a)/(b-a) : (d-v)/(d-c); }
+
+function rawFeatures(s){
+  const phS    = trap(s.ph,[4.8,5.6,6.4,7.4]);
+  const depthS = trap(s.depth,[20,55,130,210]);
+  return {
+    elev: s.elev,
+    rain: s.rain + s.fog*3.5,          // rainfall plus fog / dew interception
+    diurnal: s.diurnal,
+    water: s.waterIdx,
+    temp: s.tmean,
+    soil: 100*(phS*0.5 + depthS*0.5),
+    sun: s.sun,
+    slope: s.slope,
+    frost: s.frost,
+    heat: s.heat,
+    access: 0.6*s.access + 0.4*s.labour
+  };
+}
+const RAWF = Object.fromEntries(SITES.map(s=>[s.id, rawFeatures(s)]));
+const SUBS = Object.fromEntries(SITES.map(s=>[s.id,
+  Object.fromEntries(F.map(f=>[f, trap(RAWF[s.id][f], ENV[f])]))]));
+
+/* min–max ranges for similarity space */
+const RANGE = Object.fromEntries(F.map(f=>{
+  const v = SITES.map(s=>RAWF[s.id][f]);
+  return [f,[Math.min(...v), Math.max(...v)]];
+}));
+const norm=(f,v)=>{const[a,b]=RANGE[f];return b===a?.5:(v-a)/(b-a);};
+
+function score(id){
+  const sub=SUBS[id]; let t=0,ws=0;
+  F.forEach(f=>{ t+=W[f]*sub[f]; ws+=W[f]; });
+  return ws ? (t/ws)*100 : 0;
+}
+/* similarity uses the fixed agronomic weighting, not the live business weights */
+function distance(a,b){
+  let t=0,ws=0;
+  F.forEach(f=>{ const d=norm(f,RAWF[a][f])-norm(f,RAWF[b][f]);
+    t+=DEFAULT_W[f]*d*d; ws+=DEFAULT_W[f]; });
+  return Math.sqrt(t/ws);
+}
+function analogue(id){
+  let best=null;
+  SITES.filter(s=>s.country==="YE").forEach(y=>{
+    const d=distance(id,y.id), m=100*Math.exp(-2.3*d);
+    if(!best||m>best.match) best={id:y.id, name:y.name, match:m, d};
+  });
+  return best;
+}
+function similarity(a,b){ return 100*Math.exp(-2.3*distance(a,b)); }
+
+const BANDS=[
+  {min:84,name:"Prime",mark:"prime",  txt:"Plant now — envelope matches the Yemen champions."},
+  {min:74,name:"Strong",mark:"strong",txt:"Commercially sound with standard highland management."},
+  {min:62,name:"Viable",mark:"viable",txt:"Workable, but one or two factors need engineering."},
+  {min:50,name:"Marginal",mark:"marg",txt:"Trial plots only. Yield and cup will both be capped."},
+  {min:0 ,name:"Unsuitable",mark:"unsuit",txt:"Do not commit capital. Constraints are structural."}
+];
+const band=v=>BANDS.find(b=>v>=b.min);
+
+function etc(s){ return 950 + (s.tmean-19)*38 + (s.sun-3000)*0.06; }
+function effRain(s){ return s.rain*0.72 + s.fog*2.2; }
+function irrigationMm(s){ return Math.max(0, etc(s)-effRain(s)); }
+function potentialYield(id){
+  const s=byId[id], v=score(id);
+  return Math.round(150 + 880*Math.pow(clamp(v,0,100)/100,2.1)*(0.75+0.25*s.waterIdx/100));
+}
+function capexPerHa(s){
+  const terrace = s.slope>48 ? 46000 : s.slope>36 ? 28000 : 14000;
+  const water   = Math.round(irrigationMm(s)*52);
+  const access  = Math.round((100-s.access)*420);
+  return 58000 + terrace + water + access;
+}
+function confidence(id){
+  const s=byId[id];
+  const a=analogue(id);
+  const anaTerm = s.country==="YE" ? 1 : clamp(a.match/100,0,1);
+  return clamp(100*(0.55*s.dataQ + 0.30*anaTerm + 0.15*(s.status!=="candidate"?1:0.62)),0,100);
+}
+function risks(s){
+  const r=[]; const sub=SUBS[s.id];
+  if(sub.frost<0.7)  r.push(["Frost", `${s.frost} radiative-frost nights per winter above 2,000 m — the top of the block will need wind machines or a lower planting line.`]);
+  if(sub.heat<0.7)   r.push(["Heat", `${s.heat} days above 32 °C. Cherry scald and premature ripening; shade cover must reach 40 % before the third leaf.`]);
+  if(sub.rain<0.78)  r.push(["Rainfall deficit", `${s.rain} mm natural rainfall against ~${Math.round(etc(s))} mm crop demand. Fully irrigation-dependent.`]);
+  if(sub.water<0.72) r.push(["Water security", `Supply index ${s.waterIdx}/100. Confirm aquifer yield and salinity before any planting commitment.`]);
+  if(sub.slope<0.72) r.push(["Terrain", `${s.slope} % slope. ${s.slope>48?"Terrace rebuild dominates the capex.":"Too flat for cold-air drainage; watch frost pooling."}`]);
+  if(sub.soil<0.75)  r.push(["Soil", `pH ${s.ph.toFixed(1)}, ${s.depth} cm root zone. ${s.ph>6.9?"Alkalinity locks up iron and zinc — acidify and chelate.":"Shallow profile limits drought buffering."}`]);
+  if(sub.access<0.75) r.push(["Logistics", `Access index ${s.access}/100, labour ${s.labour}/100. Wet-mill siting and picker housing become part of the build.`]);
+  if(!r.length) r.push(["None material", "No factor falls below the tolerance band under current weights."]);
+  return r;
+}
+
+/* derived record used by every view */
+function rec(s){
+  const v=score(s.id), b=band(v), a=analogue(s.id);
+  return {...s, score:v, band:b, analogue:a, sub:SUBS[s.id], raw:RAWF[s.id],
+    pot:potentialYield(s.id), irr:irrigationMm(s), etc:etc(s), eff:effRain(s),
+    capex:capexPerHa(s), conf:confidence(s.id), yieldHist:YIELD[s.id]||null};
+}
+const records = ()=>SITES.map(rec);
+const KSA = ()=>records().filter(r=>r.country==="SA");
+const YEM = ()=>records().filter(r=>r.country==="YE");
+
+/* =====================================================================
+   Geography
+   ===================================================================== */
+const ARABIA=[[38.05,24.10],[38.55,23.30],[38.95,22.60],[39.02,22.00],[39.15,21.50],[39.10,21.05],
+[39.42,20.55],[40.05,20.20],[40.27,20.15],[40.62,19.75],[41.08,19.13],[41.35,18.60],[41.62,18.10],
+[41.95,17.60],[42.30,17.20],[42.55,16.89],[42.78,16.50],[42.90,16.10],[42.86,15.70],[42.90,15.20],
+[42.95,14.79],[43.02,14.35],[43.08,13.90],[43.25,13.32],[43.32,12.90],[43.45,12.68],[43.70,12.72],
+[44.10,12.78],[44.60,12.75],[45.03,12.79],[45.45,13.05],[46.00,13.10],[46.70,13.50],[47.40,14.00],
+[48.30,14.20],[49.13,14.54],[50.00,15.05],[51.00,15.55],[52.20,15.72],[52.90,15.90],[52.90,24.60],
+[38.00,24.60]];
+const AFRICA=[[37.20,24.60],[37.30,23.50],[37.90,22.30],[38.20,21.00],[38.60,19.50],[38.55,18.60],
+[38.60,17.50],[39.00,16.50],[39.45,15.60],[39.90,15.20],[40.35,14.60],[41.20,13.60],[42.10,13.00],
+[42.73,12.98],[43.15,12.45],[43.35,11.90],[43.15,11.60],[43.00,11.20],[44.00,10.90],[45.00,10.80],
+[46.50,10.70],[48.00,11.20],[49.50,11.50],[51.00,11.90],[51.00,10.40],[37.20,10.40]];
+const LANDS=[ARABIA,AFRICA];
+const COASTS=[ARABIA.slice(0,39), AFRICA.slice(0,24)];
+const BORDERS=[
+  [[42.79,16.42],[43.15,16.66],[43.42,17.02],[43.75,17.28],[44.10,17.42],[44.55,17.32],[45.20,17.48],
+   [46.50,17.92],[47.50,18.50],[49.00,19.00],[51.00,19.00],[52.00,18.95]],
+  [[52.00,18.95],[52.55,17.90],[52.90,17.30]],
+  [[43.15,12.45],[42.60,12.10],[42.20,11.60]]
+];
+const PLACES=[
+  ["Jeddah",39.19,21.49,1],["Makkah",39.83,21.39,1],["Ta'if",40.42,21.27,1],["Al Lith",40.27,20.15,0],
+  ["Al Qunfudhah",41.08,19.13,0],["Al Bahah",41.47,20.01,1],["Abha",42.51,18.22,1],["Khamis Mushait",42.73,18.30,0],
+  ["Jizan",42.55,16.89,1],["Najran",44.13,17.49,1],["Sa'dah",43.76,16.94,1],["Sana'a",44.21,15.35,2],
+  ["Al Hudaydah",42.95,14.79,1],["Ta'izz",44.02,13.58,1],["Ibb",44.18,13.97,1],["Dhamar",44.40,14.55,0],
+  ["Aden",45.03,12.79,2],["Al Mukalla",49.13,14.54,1],["Mocha",43.25,13.32,0],["Massawa",39.45,15.60,0],
+  ["Asmara",38.93,15.34,1],["Djibouti",43.15,11.60,1],["Yanbu",38.06,24.09,0]
+];
+const SEALABELS=[["Red Sea",39.9,19.0],["Gulf of Aden",46.2,12.2],["Arabian Sea",51.4,14.2],
+  ["Rub' al Khali",47.5,20.6],["Tihama",42.3,17.2],["Hadhramaut",48.6,16.4]];
+
+/* elevation model — crest vertices [lon, lat, peak m, half-width deg] */
+const CRESTS=[
+[[40.35,22.10,1900,.34],[40.55,21.60,2200,.32],[41.00,21.00,2050,.30],[41.35,20.40,2150,.30],
+ [41.60,19.90,2250,.30],[41.75,19.55,2300,.30],[41.95,19.15,2450,.32],[42.10,18.70,2600,.34],
+ [42.30,18.25,2900,.34],[42.55,18.00,2650,.32],[42.80,17.60,2200,.30],[43.02,17.35,2000,.26],
+ [43.12,17.05,1900,.22],[43.30,16.75,1750,.22],[43.48,16.35,1900,.24],[43.55,15.95,2200,.28],
+ [43.70,15.55,2500,.30],[43.90,15.32,3200,.30],[44.05,15.10,2600,.28],[44.18,14.80,2800,.28],
+ [44.22,14.50,2900,.28],[44.15,14.15,2600,.28],[44.02,13.92,2200,.26],[43.95,13.65,2000,.24],
+ [44.15,13.45,1900,.24],[44.40,13.30,1600,.22]],
+[[44.35,14.35,2200,.26],[44.80,14.25,1900,.28],[45.30,14.05,1700,.28],[45.80,13.95,1500,.28],
+ [46.30,14.25,1250,.30]],
+[[47.20,15.20,1000,.50],[48.50,15.80,1100,.60],[49.80,16.20,1000,.60]],
+[[43.30,17.00,2300,.20],[43.42,16.92,2400,.20],[43.62,16.85,2150,.24],[43.85,16.95,1800,.28]],
+[[43.20,18.60,1550,.55],[44.20,19.20,1200,.70],[45.50,20.00,900,.90],[46.80,20.60,700,1.0]],
+[[40.90,22.60,1500,.50],[41.80,23.20,1150,.70],[43.00,23.60,850,.90]],
+[[38.90,15.40,2200,.45],[39.40,14.20,2400,.50],[39.80,13.20,2600,.50],[40.60,12.20,2000,.50],
+ [41.80,11.30,1500,.50],[38.60,16.50,1600,.50],[39.30,17.20,1100,.55]]
+];
+/* resample crests into gaussian peaks, bucketed on a 1° grid */
+const PEAKS=[];
+CRESTS.forEach(c=>{
+  for(let i=0;i<c.length-1;i++){
+    const [x0,y0,h0,w0]=c[i], [x1,y1,h1,w1]=c[i+1];
+    const seg=Math.hypot(x1-x0,y1-y0), n=Math.max(1,Math.round(seg/0.055));
+    for(let k=0;k<n;k++){ const t=k/n;
+      PEAKS.push([lerp(x0,x1,t),lerp(y0,y1,t),lerp(h0,h1,t),lerp(w0,w1,t)]); }
+  }
+  const l=c[c.length-1]; PEAKS.push([l[0],l[1],l[2],l[3]]);
+});
+const BUCKET=new Map();
+const bkey=(i,j)=>(i+200)*1000+(j+200);
+PEAKS.forEach(p=>{
+  const r=Math.ceil(p[3]*2.2);
+  for(let dx=-r;dx<=r;dx++) for(let dy=-r;dy<=r;dy++){
+    const k=bkey(Math.floor(p[0])+dx, Math.floor(p[1])+dy);
+    if(!BUCKET.has(k)) BUCKET.set(k,[]); BUCKET.get(k).push(p);
+  }
+});
+function ridgeAt(lon,lat){
+  const arr=BUCKET.get(bkey(Math.floor(lon),Math.floor(lat))); if(!arr) return 0;
+  let m=0;
+  for(let i=0;i<arr.length;i++){
+    const p=arr[i], dx=(lon-p[0])*0.955, dy=lat-p[1];
+    const q=(dx*dx+dy*dy)/(p[3]*p[3]);
+    if(q<9){ const v=p[2]*Math.exp(-q); if(v>m) m=v; }
+  }
+  return m;
+}
+/* coarse distance-to-coast field, for the coastal plain / interior base level */
+const CD={x0:37.0,y0:10.2,step:0.12,w:0,h:0,d:null};
+(function(){
+  const pts=[]; COASTS.forEach(c=>{
+    for(let i=0;i<c.length-1;i++){ const a=c[i],b=c[i+1];
+      const n=Math.max(1,Math.round(Math.hypot(b[0]-a[0],b[1]-a[1])/0.12));
+      for(let k=0;k<n;k++) pts.push([lerp(a[0],b[0],k/n),lerp(a[1],b[1],k/n)]); }
+  });
+  CD.w=Math.ceil((53.2-CD.x0)/CD.step); CD.h=Math.ceil((24.8-CD.y0)/CD.step);
+  CD.d=new Float32Array(CD.w*CD.h);
+  for(let j=0;j<CD.h;j++){ const la=CD.y0+j*CD.step;
+    for(let i=0;i<CD.w;i++){ const lo=CD.x0+i*CD.step; let m=1e9;
+      for(let k=0;k<pts.length;k++){ const dx=(lo-pts[k][0])*0.955, dy=la-pts[k][1];
+        const q=dx*dx+dy*dy; if(q<m) m=q; }
+      CD.d[j*CD.w+i]=Math.sqrt(m);
+    }}
+})();
+function coastDist(lon,lat){
+  const fx=clamp((lon-CD.x0)/CD.step,0,CD.w-1.001), fy=clamp((lat-CD.y0)/CD.step,0,CD.h-1.001);
+  const i=fx|0,j=fy|0,tx=fx-i,ty=fy-j;
+  const a=CD.d[j*CD.w+i],b=CD.d[j*CD.w+i+1],c=CD.d[(j+1)*CD.w+i],e=CD.d[(j+1)*CD.w+i+1];
+  return lerp(lerp(a,b,tx),lerp(c,e,tx),ty);
+}
+function pip(poly,x,y){
+  let inside=false;
+  for(let i=0,j=poly.length-1;i<poly.length;j=i++){
+    const xi=poly[i][0],yi=poly[i][1],xj=poly[j][0],yj=poly[j][1];
+    if(((yi>y)!==(yj>y)) && (x < (xj-xi)*(y-yi)/(yj-yi)+xi)) inside=!inside;
+  }
+  return inside;
+}
+function isLand(lon,lat){ return pip(ARABIA,lon,lat)||pip(AFRICA,lon,lat); }
+
+/* value-noise roughness so ridges read as dissected terrain, not smooth domes */
+function hash2(i,j){
+  let h=Math.imul(i,374761393)+Math.imul(j,668265263);
+  h=Math.imul(h^(h>>>13),1274126177);
+  return ((h^(h>>>16))>>>0)/4294967296;
+}
+function vnoise(x,y){
+  const i=Math.floor(x),j=Math.floor(y),fx=x-i,fy=y-j;
+  const u=fx*fx*(3-2*fx), v=fy*fy*(3-2*fy);
+  return lerp(lerp(hash2(i,j),hash2(i+1,j),u), lerp(hash2(i,j+1),hash2(i+1,j+1),u), v);
+}
+function fbm(x,y){
+  let a=0.5,f=1,s=0,n=0;
+  for(let k=0;k<4;k++){ s+=a*vnoise(x*f,y*f); n+=a; a*=0.5; f*=2.07; }
+  return s/n;
+}
+function elevation(lon,lat){
+  const base=760*(1-Math.exp(-coastDist(lon,lat)/0.9));
+  const e=base + ridgeAt(lon,lat);
+  const rough=(fbm(lon*16+3.1, lat*16+7.7)-0.5)*2;
+  return Math.max(0, e + (0.11*e+55)*rough);
+}
+</script>
+
+<script>
+"use strict";
+/* =====================================================================
+   Map engine — hillshaded terrain on canvas, optional live Google Maps
+   ===================================================================== */
+const merc = lat => Math.log(Math.tan(Math.PI/4 + clamp(lat,-85,85)*Math.PI/360));
+const invMerc = y => (Math.atan(Math.exp(y))*360/Math.PI) - 90;
+
+const SCOPES={
+  ksa :{lat:18.4, lon:42.5, span:5.0},
+  yem :{lat:15.1, lon:44.0, span:4.0},
+  both:{lat:17.3, lon:43.4, span:8.6}
+};
+function cssVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+function hexToRgb(h){
+  h=h.trim(); if(h.startsWith("#")) h=h.slice(1);
+  if(h.length===3) h=h.split("").map(c=>c+c).join("");
+  return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];
+}
+const isDark = ()=>{
+  const t=document.documentElement.getAttribute("data-theme");
+  if(t) return t==="dark";
+  return matchMedia("(prefers-color-scheme: dark)").matches;
+};
+
+class TerrainMap{
+  constructor(host){
+    this.host=host;
+    this.canvas=document.createElement("canvas");
+    this.ovl=document.createElement("div"); this.ovl.className="ovl";
+    this.gmount=document.createElement("div"); this.gmount.className="gmount";
+    this.tip=document.createElement("div"); this.tip.className="maptip";
+    host.append(this.canvas,this.ovl,this.gmount,this.tip);
+    this.ctx=this.canvas.getContext("2d",{alpha:false});
+    this.buf=document.createElement("canvas");
+    this.bctx=this.buf.getContext("2d");
+    this.center={lat:17,lon:43.6}; this.span=10.4;
+    this.sites=[]; this.layer="relief"; this.links=[];
+    this.onSelect=null; this.selected=null;
+    this.rendered=null; this.pending=null; this.gmap=null; this.gmarkers=[];
+    this._bind();
+    this.ro=new ResizeObserver(()=>this.resize()); this.ro.observe(host);
+  }
+  /* ---- projection ---- */
+  get geo(){
+    const r=this.host.getBoundingClientRect();
+    const w=Math.max(1,r.width), h=Math.max(1,r.height);
+    const my=merc(this.center.lat);
+    const dLon=this.span, dY=(dLon*Math.PI/180)*(h/w);
+    return {w,h,my,dLon,dY,lon0:this.center.lon-dLon/2,
+      y0:my-dY/2, y1:my+dY/2};
+  }
+  proj(lon,lat){ const g=this.geo;
+    return [ (lon-g.lon0)/g.dLon*g.w, (g.y1-merc(lat))/(g.y1-g.y0)*g.h ]; }
+  unproj(px,py){ const g=this.geo;
+    return [ g.lon0+px/g.w*g.dLon, invMerc(g.y1-(py/g.h)*(g.y1-g.y0)) ]; }
+  bounds(){ const g=this.geo;
+    return {w:g.lon0,e:g.lon0+g.dLon,s:invMerc(g.y0),n:invMerc(g.y1)}; }
+
+  setScope(k){ const s=SCOPES[k]||SCOPES.both;
+    this.center={lat:s.lat,lon:s.lon}; this.span=s.span; this.schedule(true); }
+  setSites(list){ this.sites=list; this.drawOverlay(); this.syncGoogle(); }
+  setLayer(l){ this.layer=l; this.schedule(); }
+  setLinks(l){ this.links=l||[]; this.schedule(); }
+  select(id){ this.selected=id; this.drawOverlay(); this.syncGoogleSel(); }
+
+  resize(){
+    const r=this.host.getBoundingClientRect(); if(!r.width||!r.height) return;
+    const dpr=Math.min(2,devicePixelRatio||1);
+    this.canvas.width=Math.round(r.width*dpr); this.canvas.height=Math.round(r.height*dpr);
+    this.ctx.setTransform(dpr,0,0,dpr,0,0);
+    this.schedule(true);
+  }
+  /* ---- interaction ---- */
+  _bind(){
+    const h=this.host; let drag=null;
+    h.addEventListener("pointerdown",e=>{
+      if(e.target.closest(".hit")||e.target.closest(".mapctl")) return;
+      drag={x:e.clientX,y:e.clientY,c:{...this.center},moved:0};
+      h.setPointerCapture(e.pointerId); h.classList.add("drag");
+    });
+    h.addEventListener("pointermove",e=>{
+      if(!drag) return;
+      const g=this.geo, dx=e.clientX-drag.x, dy=e.clientY-drag.y;
+      drag.moved=Math.max(drag.moved,Math.abs(dx)+Math.abs(dy));
+      const lon=drag.c.lon - dx/g.w*g.dLon;
+      const my=merc(drag.c.lat) + dy/g.h*(g.y1-g.y0);
+      this.center={lon, lat:clamp(invMerc(my),8,27)};
+      this.paintFast(); this.drawOverlay();
+    });
+    const end=e=>{ if(!drag) return; const m=drag.moved; drag=null;
+      h.classList.remove("drag"); if(m>2) this.schedule(); };
+    h.addEventListener("pointerup",end); h.addEventListener("pointercancel",end);
+    h.addEventListener("wheel",e=>{
+      e.preventDefault();
+      const r=h.getBoundingClientRect(), px=e.clientX-r.left, py=e.clientY-r.top;
+      const [lo,la]=this.unproj(px,py);
+      const k=Math.exp(e.deltaY*0.0016);
+      const ns=clamp(this.span*k,0.7,17);
+      const f=ns/this.span; this.span=ns;
+      this.center.lon = lo + (this.center.lon-lo)*f;
+      const my=merc(la)+(merc(this.center.lat)-merc(la))*f;
+      this.center.lat=clamp(invMerc(my),8,27);
+      this.paintFast(); this.drawOverlay(); this.schedule();
+    },{passive:false});
+    h.addEventListener("dblclick",e=>{ if(e.target.closest(".hit")) return;
+      this.zoom(0.6); });
+  }
+  zoom(f){ this.span=clamp(this.span*f,0.7,17); this.paintFast(); this.drawOverlay(); this.schedule(); }
+  home(){ this.setScope(this.scope||"both"); }
+
+  /* ---- render ---- */
+  schedule(now){
+    clearTimeout(this._t);
+    if(now){ this.render(); return; }
+    this._t=setTimeout(()=>this.render(),110);
+  }
+  paintFast(){
+    if(!this.rendered) return;
+    const g=this.geo, r=this.rendered, ctx=this.ctx;
+    ctx.fillStyle=cssVar("--sea")||"#eee"; ctx.fillRect(0,0,g.w,g.h);
+    const sx=(r.lon0-g.lon0)/g.dLon*g.w;
+    const sw=r.dLon/g.dLon*g.w;
+    const sy=(g.y1-r.y1)/(g.y1-g.y0)*g.h;
+    const sh=(r.y1-r.y0)/(g.y1-g.y0)*g.h;
+    ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality="high";
+    ctx.drawImage(r.bmp,sx,sy,sw,sh);
+  }
+  render(){
+    const g=this.geo; if(g.w<10||g.h<10) return;
+    const dark=isDark();
+    const SEA=hexToRgb(cssVar("--sea")||(dark?"#131617":"#eef0f1"));
+    const LOW =dark?[22,25,27]:[255,255,255];
+    const HIGH=dark?[114,118,121]:[142,145,147];
+    const full=g.w*g.h<=1500000;   // full-res relief unless the canvas is very large
+    const q=full?1:2;
+    const GW=Math.max(80,Math.round(g.w/q)), GH=Math.max(60,Math.round(g.h/q));
+    const E=new Float32Array((GW+2)*(GH+2));
+    const M=new Uint8Array((GW+2)*(GH+2));
+    const dy=(g.y1-g.y0)/GH, dx=g.dLon/GW;
+    for(let j=-1;j<=GH;j++){
+      const my=g.y1-(j+0.5)*dy, la=invMerc(my);
+      for(let i=-1;i<=GW;i++){
+        const lo=g.lon0+(i+0.5)*dx, k=(j+1)*(GW+2)+(i+1);
+        if(isLand(lo,la)){ M[k]=1; E[k]=elevation(lo,la); } else { M[k]=0; E[k]=0; }
+      }
+    }
+    const img=this.bctx.createImageData(GW,GH);
+    const D=img.data;
+    /* metres per grid cell, for the hillshade gradient */
+    const mLat=Math.abs(invMerc(g.y1)-invMerc(g.y0))/GH*111000;
+    const mLon=dx*111000*Math.cos(this.center.lat*Math.PI/180);
+    const az=315*Math.PI/180, alt=42*Math.PI/180;
+    const lx=-Math.cos(alt)*Math.sin(az), ly=Math.cos(alt)*Math.cos(az), lz=Math.sin(alt);
+    const zf=2.6, CI=500;
+    for(let j=0;j<GH;j++){
+      for(let i=0;i<GW;i++){
+        const k=(j+1)*(GW+2)+(i+1), o=(j*GW+i)*4;
+        if(!M[k]){ const t=(j%5===0)?(dark?1.5:0.965):1;
+          D[o]=clamp(SEA[0]*t,0,255);D[o+1]=clamp(SEA[1]*t,0,255);D[o+2]=clamp(SEA[2]*t,0,255);D[o+3]=255; continue; }
+        const el=E[k];
+        const ex=(E[k+1]-E[k-1])/(2*mLon)*zf;
+        const ey=(E[k-(GW+2)]-E[k+(GW+2)])/(2*mLat)*zf;
+        const len=Math.sqrt(ex*ex+ey*ey+1);
+        let sh=(-ex*lx - ey*ly + lz)/len;
+        sh=clamp(0.30+0.85*sh,0,1.35);
+        const t=clamp(el/(dark?3400:2900),0,1), tt=Math.pow(t,dark?1.15:0.78);
+        let r=lerp(LOW[0],HIGH[0],tt), gg=lerp(LOW[1],HIGH[1],tt), b=lerp(LOW[2],HIGH[2],tt);
+        const m=dark ? (0.62+0.72*sh) : (0.68+0.52*sh);
+        r*=m; gg*=m; b*=m;
+        /* contour break at every 500 m */
+        const cb=Math.floor(el/CI);
+        if(M[k+1]&&Math.floor(E[k+1]/CI)!==cb || M[k+(GW+2)]&&Math.floor(E[k+(GW+2)]/CI)!==cb){
+          const f=dark?1.16:0.86; r*=f; gg*=f; b*=f;
+        }
+        D[o]=clamp(r,0,255); D[o+1]=clamp(gg,0,255); D[o+2]=clamp(b,0,255); D[o+3]=255;
+      }
+    }
+    this.buf.width=GW; this.buf.height=GH;
+    this.bctx.putImageData(img,0,0);
+    createImageBitmap(this.buf).then(bmp=>{
+      this.rendered={bmp,lon0:g.lon0,dLon:g.dLon,y0:g.y0,y1:g.y1};
+      this.paint();
+    }).catch(()=>{ this.rendered={bmp:this.buf,lon0:g.lon0,dLon:g.dLon,y0:g.y0,y1:g.y1}; this.paint(); });
+  }
+  paint(){
+    const g=this.geo, ctx=this.ctx, dark=isDark();
+    ctx.fillStyle=cssVar("--sea"); ctx.fillRect(0,0,g.w,g.h);
+    this.paintFast();
+    const P=(lon,lat)=>this.proj(lon,lat);
+    /* graticule */
+    ctx.save();
+    ctx.strokeStyle=dark?"rgba(243,245,245,.07)":"rgba(11,12,13,.07)"; ctx.lineWidth=1;
+    const stepG = g.dLon>8?4:g.dLon>4?2:1;
+    for(let lo=Math.ceil(g.lon0/stepG)*stepG; lo<g.lon0+g.dLon; lo+=stepG){
+      const [x]=P(lo,0); ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,g.h); ctx.stroke(); }
+    const b=this.bounds();
+    for(let la=Math.ceil(b.s/stepG)*stepG; la<b.n; la+=stepG){
+      const [,y]=P(0,la); ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(g.w,y); ctx.stroke(); }
+    ctx.restore();
+    /* coastline */
+    ctx.save();
+    ctx.strokeStyle=cssVar("--seaLine")||"#ccc"; ctx.lineWidth=1.1; ctx.lineJoin="round";
+    COASTS.forEach(c=>{ ctx.beginPath();
+      c.forEach((p,i)=>{ const[x,y]=P(p[0],p[1]); i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
+      ctx.stroke(); });
+    ctx.strokeStyle=dark?"rgba(243,245,245,.30)":"rgba(11,12,13,.28)"; ctx.lineWidth=1.4;
+    COASTS.forEach(c=>{ ctx.beginPath();
+      c.forEach((p,i)=>{ const[x,y]=P(p[0],p[1]); i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
+      ctx.stroke(); });
+    /* borders */
+    ctx.setLineDash([7,4]); ctx.lineWidth=1.3;
+    ctx.strokeStyle=dark?"rgba(243,245,245,.5)":"rgba(11,12,13,.42)";
+    BORDERS.forEach(bd=>{ ctx.beginPath();
+      bd.forEach((p,i)=>{ const[x,y]=P(p[0],p[1]); i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
+      ctx.stroke(); });
+    ctx.setLineDash([]);
+    ctx.restore();
+    /* analogue links */
+    if(this.links.length){
+      ctx.save(); ctx.lineWidth=1.2; ctx.setLineDash([3,3]);
+      ctx.strokeStyle=dark?"rgba(243,245,245,.42)":"rgba(11,12,13,.36)";
+      this.links.forEach(([a,bb,wgt])=>{
+        const A=byId[a],B=byId[bb]; if(!A||!B) return;
+        const[x1,y1]=P(A.lon,A.lat), [x2,y2]=P(B.lon,B.lat);
+        const mx=(x1+x2)/2, my=(y1+y2)/2, nx=-(y2-y1), ny=(x2-x1);
+        const l=Math.hypot(nx,ny)||1, k=0.16;
+        ctx.globalAlpha=clamp(wgt,.25,1);
+        ctx.beginPath(); ctx.moveTo(x1,y1);
+        ctx.quadraticCurveTo(mx+nx/l*l*k, my+ny/l*l*k, x2,y2); ctx.stroke();
+      });
+      ctx.restore();
+    }
+    this.drawOverlay();
+  }
+
+  markSVG(kind,size){
+    const s=size||13, c="var(--ink)";
+    const base=`<svg width="${s+8}" height="${s+8}" viewBox="0 0 ${s+8} ${s+8}" aria-hidden="true">`;
+    const cx=(s+8)/2, r=s/2;
+    const halo=`<circle cx="${cx}" cy="${cx}" r="${r+2.6}" fill="var(--paper)" opacity=".82"/>`;
+    if(kind==="prime")  return base+halo+`<path d="M${cx} ${cx-r} L${cx+r} ${cx} L${cx} ${cx+r} L${cx-r} ${cx} Z" fill="${c}"/></svg>`;
+    if(kind==="strong") return base+halo+`<circle cx="${cx}" cy="${cx}" r="${r*0.82}" fill="${c}"/></svg>`;
+    if(kind==="viable") return base+halo+`<circle cx="${cx}" cy="${cx}" r="${r*0.82}" fill="none" stroke="${c}" stroke-width="1.6"/><path d="M${cx} ${cx-r*0.82} A ${r*0.82} ${r*0.82} 0 0 1 ${cx} ${cx+r*0.82} Z" fill="${c}"/></svg>`;
+    if(kind==="marg")   return base+halo+`<circle cx="${cx}" cy="${cx}" r="${r*0.78}" fill="none" stroke="${c}" stroke-width="1.6"/></svg>`;
+    if(kind==="unsuit") return base+halo+`<circle cx="${cx}" cy="${cx}" r="${r*0.78}" fill="none" stroke="${c}" stroke-width="1.4" stroke-dasharray="2.6 2.4"/></svg>`;
+    if(kind==="champ")  return base+halo+`<path d="M${cx} ${cx-r} L${cx+r*0.62} ${cx+r*0.72} L${cx-r*0.62} ${cx+r*0.72} Z" fill="${c}"/></svg>`;
+    return base+halo+`<circle cx="${cx}" cy="${cx}" r="${r*0.7}" fill="${c}"/></svg>`;
+  }
+  drawOverlay(){
+    const g=this.geo, b=this.bounds(), o=this.ovl;
+    o.innerHTML="";
+    const frag=document.createDocumentFragment();
+    const taken=[];
+    const place=(x,y,w,h)=>{
+      const r={x:x-w/2,y,w,h};
+      for(const t of taken) if(!(r.x+r.w<t.x||t.x+t.w<r.x||r.y+r.h<t.y||t.y+t.h<r.y)) return false;
+      taken.push(r); return true;
+    };
+    const est=t=>t.length*5.4+8;
+    /* sea + region labels claim space first */
+    if(g.dLon>3.2) SEALABELS.forEach(([n,lo,la])=>{
+      if(lo<b.w||lo>b.e||la<b.s||la>b.n) return;
+      const [x,y]=this.proj(lo,la);
+      if(!place(x,y-6,est(n)*1.5,14)) return;
+      const d=document.createElement("div");
+      d.className="geo"; d.style.left=x+"px"; d.style.top=y+"px"; d.textContent=n; frag.append(d);
+    });
+    /* site markers always draw; their labels compete for space */
+    const marks=[];
+    this.sites.forEach(s=>{
+      if(s.lon<b.w-.5||s.lon>b.e+.5||s.lat<b.s-.5||s.lat>b.n+.5) return;
+      const [x,y]=this.proj(s.lon,s.lat);
+      const hit=document.createElement("button");
+      hit.className="hit"+(this.selected===s.id?" sel":"");
+      hit.style.left=x+"px"; hit.style.top=y+"px";
+      hit.setAttribute("aria-label",`${s.name} — ${s.band.name}, score ${s.score.toFixed(0)}`);
+      let kind, size=13;
+      if(this.layer==="score"){ kind=s.band.mark; size=9+(s.score/100)*13; }
+      else if(this.layer==="water"){
+        const st=clamp(s.irr/700,0,1); kind= st>.8?"unsuit":st>.62?"marg":st>.45?"viable":"strong"; size=10+st*10;
+      } else if(this.layer==="yield" && s.yieldHist){
+        kind="strong"; size=8+clamp((s.yieldHist[10]-280)/500,0,1)*12;
+      } else if(this.layer==="analogue"){ kind=s.country==="YE"?"champ":s.band.mark; size=13; }
+      else kind = s.country==="YE" ? "champ" : (s.status==="established" ? "strong" : s.band.mark);
+      hit.innerHTML=this.markSVG(kind,size);
+      hit.addEventListener("click",ev=>{ ev.stopPropagation(); this.onSelect&&this.onSelect(s.id); });
+      hit.addEventListener("pointerenter",()=>this.showTip(s,x,y));
+      hit.addEventListener("pointerleave",()=>this.tip.classList.remove("on"));
+      frag.append(hit);
+      taken.push({x:x-9,y:y-9,w:18,h:18});
+      marks.push({s,x,y});
+    });
+    /* selected first, then by score, so the label that survives is the one that matters */
+    marks.sort((a,c)=>(this.selected===c.s.id)-(this.selected===a.s.id)||c.s.score-a.s.score)
+      .forEach(({s,x,y})=>{
+        if(g.dLon>12 && this.selected!==s.id) return;
+        const wd=est(s.name);
+        const spots=[[x,y+12],[x,y-25],[x+wd/2+13,y-6],[x-wd/2-13,y-6]];
+        const hit=spots.find(([lx,ly])=>place(lx,ly,wd,13));
+        if(!hit) return;
+        const l=document.createElement("div"); l.className="lbl";
+        l.style.left=hit[0]+"px"; l.style.top=hit[1]+"px"; l.textContent=s.name; frag.append(l);
+      });
+    /* settlements fill whatever gaps are left */
+    const minRank = g.dLon>8?1:g.dLon>4?0.5:0;
+    PLACES.forEach(([n,lo,la,rank])=>{
+      if(rank<minRank) return;
+      if(lo<b.w||lo>b.e||la<b.s||la>b.n) return;
+      const [x,y]=this.proj(lo,la);
+      if(!place(x,y+4,est(n)+8,13)) return;
+      const dot=document.createElement("div");
+      dot.className="lbl"; dot.style.left=x+"px"; dot.style.top=(y+5)+"px";
+      dot.innerHTML=`<svg width="4" height="4" style="vertical-align:1px;margin-right:3px"><circle cx="2" cy="2" r="1.6" fill="var(--ink3)"/></svg>${n}`;
+      frag.append(dot);
+    });
+    o.append(frag);
+  }
+  showTip(s,x,y){
+    const t=this.tip;
+    const yr = s.yieldHist ? s.yieldHist[s.yieldHist.length-1]+" kg/ha" : "—";
+    t.innerHTML=`<div class="n">${s.name}</div>
+      <div class="r"><span>${s.admin}, ${s.country==="YE"?"Yemen":"Saudi Arabia"}</span></div>
+      <div class="r"><span>Elevation</span><b>${s.elev.toLocaleString()} m</b></div>
+      <div class="r"><span>AI score</span><b>${s.score.toFixed(1)}</b></div>
+      <div class="r"><span>${s.yieldHist?"2025 yield":"Potential"}</span><b>${s.yieldHist?yr:s.pot+" kg/ha"}</b></div>`;
+    t.style.left=x+"px"; t.style.top=(y-10)+"px"; t.classList.add("on");
+  }
+
+  /* ---- live Google Maps ---- */
+  enableGoogle(key){
+    this.host.classList.add("gmode");
+    if(this.gmap){ this.syncGoogle(); return Promise.resolve(true); }
+    return loadGoogle(key).then(()=>{
+      const dark=isDark();
+      this.gmap=new google.maps.Map(this.gmount,{
+        center:{lat:this.center.lat,lng:this.center.lon},
+        zoom:Math.round(Math.log2(360/this.span))+1,
+        mapTypeId:"terrain", mapTypeControl:true, streetViewControl:false,
+        fullscreenControl:false, styles:googleStyles(dark)
+      });
+      this.gmap.addListener("idle",()=>{
+        const c=this.gmap.getCenter(); if(!c) return;
+        this.center={lat:c.lat(),lon:c.lng()};
+        const b=this.gmap.getBounds(); if(b) this.span=b.getNorthEast().lng()-b.getSouthWest().lng();
+      });
+      this.syncGoogle(); return true;
+    });
+  }
+  disableGoogle(){ this.host.classList.remove("gmode"); this.schedule(true); }
+  syncGoogle(){
+    if(!this.gmap||!window.google) return;
+    this.gmarkers.forEach(m=>m.setMap(null)); this.gmarkers=[];
+    this.sites.forEach(s=>{
+      const kind = s.country==="YE" ? "champ" : (s.status==="established"?"strong":s.band.mark);
+      const dark=isDark(), col=dark?"#f3f5f5":"#0b0c0d", pap=dark?"#0b0c0d":"#ffffff";
+      const svg=this.markSVG(kind,14).replace(/var\(--ink\)/g,col).replace(/var\(--paper\)/g,pap);
+      const m=new google.maps.Marker({
+        position:{lat:s.lat,lng:s.lon}, map:this.gmap, title:`${s.name} — score ${s.score.toFixed(0)}`,
+        icon:{url:"data:image/svg+xml;charset=UTF-8,"+encodeURIComponent(svg),
+              scaledSize:new google.maps.Size(22,22), anchor:new google.maps.Point(11,11)},
+        label:{text:s.name, fontFamily:"IBM Plex Mono, monospace", fontSize:"10px",
+               color:col, className:"gmlbl"}
+      });
+      m.addListener("click",()=>this.onSelect&&this.onSelect(s.id));
+      this.gmarkers.push(m);
+    });
+  }
+  syncGoogleSel(){
+    if(!this.gmap) return;
+    const s=this.sites.find(x=>x.id===this.selected); if(!s) return;
+    this.gmap.panTo({lat:s.lat,lng:s.lon});
+  }
+}
+
+let _gp=null;
+function loadGoogle(key){
+  if(window.google&&window.google.maps) return Promise.resolve();
+  if(_gp) return _gp;
+  _gp=new Promise((res,rej)=>{
+    const to=setTimeout(()=>rej(new Error("timeout")),9000);
+    window.gm_authFailure=()=>{clearTimeout(to);rej(new Error("auth"));};
+    const s=document.createElement("script");
+    s.src=`https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&v=weekly&libraries=geometry`;
+    s.async=true;
+    s.onload=()=>{clearTimeout(to);res();};
+    s.onerror=()=>{clearTimeout(to);rej(new Error("blocked"));};
+    document.head.append(s);
+  });
+  _gp.catch(()=>{_gp=null;});
+  return _gp;
+}
+function googleStyles(dark){
+  const g=(k,v)=>({elementType:k,stylers:v});
+  const base=dark
+    ? [{elementType:"geometry",stylers:[{color:"#181a1c"}]},
+       {elementType:"labels.text.fill",stylers:[{color:"#8b9197"}]},
+       {elementType:"labels.text.stroke",stylers:[{color:"#0b0c0d"}]},
+       {featureType:"water",elementType:"geometry",stylers:[{color:"#0f1213"}]},
+       {featureType:"landscape.natural",elementType:"geometry",stylers:[{color:"#212528"}]},
+       {featureType:"road",elementType:"geometry",stylers:[{color:"#2b2f33"}]},
+       {featureType:"poi",stylers:[{visibility:"off"}]},
+       {featureType:"transit",stylers:[{visibility:"off"}]},
+       {featureType:"administrative",elementType:"geometry.stroke",stylers:[{color:"#474d52"}]}]
+    : [{elementType:"geometry",stylers:[{color:"#f6f7f7"}]},
+       {elementType:"labels.text.fill",stylers:[{color:"#6b7176"}]},
+       {elementType:"labels.text.stroke",stylers:[{color:"#ffffff"}]},
+       {featureType:"water",elementType:"geometry",stylers:[{color:"#e7eaeb"}]},
+       {featureType:"landscape.natural",elementType:"geometry",stylers:[{color:"#ececec"}]},
+       {featureType:"road",elementType:"geometry",stylers:[{color:"#ffffff"}]},
+       {featureType:"poi",stylers:[{visibility:"off"}]},
+       {featureType:"transit",stylers:[{visibility:"off"}]},
+       {featureType:"administrative",elementType:"geometry.stroke",stylers:[{color:"#b4b9be"}]}];
+  return base.concat([{elementType:"labels.icon",stylers:[{visibility:"off"}]},
+                      {stylers:[{saturation:-100}]}]);
+}
+</script>
+
+<script>
+"use strict";
+/* =====================================================================
+   Charts — hand-built SVG, monochrome, hover layer on every plot
+   ===================================================================== */
+const TIP=document.getElementById("tip");
+function tipShow(html,x,y){
+  TIP.innerHTML=html; TIP.classList.add("on");
+  const r=TIP.getBoundingClientRect();
+  TIP.style.left=clamp(x+14,8,innerWidth-r.width-8)+"px";
+  TIP.style.top=clamp(y-r.height-12,8,innerHeight-r.height-8)+"px";
+}
+function tipHide(){ TIP.classList.remove("on"); }
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmtS=n=>Number.isInteger(n)?fmt(n):fmt(n,1);
+const fmt=(n,d)=>Number(n).toLocaleString(undefined,{minimumFractionDigits:d||0,maximumFractionDigits:d||0});
+const shortName=n=>n.replace(/^(Al|Ar|As|Ash|Jabal|Wadi|Bani)\s+/,"").split(/[ \u2013-]/)[0];
+const W_OF=el=>Math.max(220,Math.round(el.getBoundingClientRect().width||el.clientWidth||520));
+
+function niceTicks(min,max,n){
+  const span=max-min||1, raw=span/n, mag=Math.pow(10,Math.floor(Math.log10(raw)));
+  const st=[1,2,2.5,5,10].map(m=>m*mag).find(m=>m>=raw)||10*mag;
+  const lo=Math.floor(min/st)*st, hi=Math.ceil(max/st)*st, out=[];
+  for(let v=lo;v<=hi+st*1e-6;v+=st) out.push(+v.toFixed(10));
+  return out;
+}
+function path(pts){ return pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join(" "); }
+
+/* --- multi-series line chart with crosshair ------------------------------ */
+function lineChart(el,{labels,series,yLabel,fmtV,yZero}){
+  const w=W_OF(el), h=el.dataset.h?+el.dataset.h:230;
+  const m={l:46,r:22,t:22,b:26}, iw=w-m.l-m.r, ih=h-m.t-m.b;
+  const all=series.flatMap(s=>s.values.filter(v=>v!=null));
+  let lo=Math.min(...all), hi=Math.max(...all);
+  if(yZero) lo=Math.min(0,lo);
+  const pad=(hi-lo)*0.12||1;
+  const ticks=niceTicks(lo>=0?0:lo-pad, hi+pad, 4);
+  const y0=ticks[0], y1=ticks[ticks.length-1];
+  const X=i=>m.l+(labels.length<2?iw/2:i/(labels.length-1)*iw);
+  const Y=v=>m.t+ih-(v-y0)/(y1-y0)*ih;
+  let s=`<svg class="chart" width="${w}" height="${h}" role="img">`;
+  ticks.forEach(t=>{ s+=`<line class="gridline" x1="${m.l}" x2="${w-m.r}" y1="${Y(t).toFixed(1)}" y2="${Y(t).toFixed(1)}"/>
+    <text x="${m.l-8}" y="${(Y(t)+3.5).toFixed(1)}" text-anchor="end">${fmt(t)}</text>`; });
+  const step=labels.length>9?2:1;
+  labels.forEach((L,i)=>{ if(i%step && i!==labels.length-1) return;
+    const anc=i===0?"start":i===labels.length-1?"end":"middle";
+    s+=`<text x="${X(i).toFixed(1)}" y="${h-8}" text-anchor="${anc}">${esc(L)}</text>`; });
+  series.forEach((se,si)=>{
+    const pts=se.values.map((v,i)=>v==null?null:[X(i),Y(v)]).filter(Boolean);
+    if(se.area) s+=`<path class="area" d="${path(pts)} L${X(labels.length-1)} ${m.t+ih} L${X(0)} ${m.t+ih} Z"/>`;
+    s+=`<path class="ser${si?" b":""}" d="${path(pts)}" ${se.faint?'opacity=".33"':''}/>`;
+    if(se.endLabel!==false&&pts.length){
+      const p=pts[pts.length-1];
+      s+=`<circle class="dot${si?" hollow":""}" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3.6"/>`;
+      if(se.name&&!se.faint) s+=`<text class="val" x="${(p[0]-6).toFixed(1)}" y="${(p[1]-9).toFixed(1)}" text-anchor="end">${esc(se.name)}</text>`;
+    }
+  });
+  s+=`<line class="axis" x1="${m.l}" x2="${w-m.r}" y1="${m.t+ih}" y2="${m.t+ih}"/>`;
+  if(yLabel) s+=`<text x="2" y="11" class="axl">${esc(yLabel)}</text>`;
+  s+=`<g class="xh" style="display:none"><line class="cross" y1="${m.t}" y2="${m.t+ih}"/></g>`;
+  s+=`<rect class="hover" x="${m.l}" y="${m.t}" width="${iw}" height="${ih}"/></svg>`;
+  el.innerHTML=s;
+  const svg=el.firstChild, xh=svg.querySelector(".xh"), ln=xh.querySelector("line");
+  svg.querySelector(".hover").addEventListener("pointermove",e=>{
+    const r=svg.getBoundingClientRect();
+    const i=clamp(Math.round((e.clientX-r.left-m.l)/(iw||1)*(labels.length-1)),0,labels.length-1);
+    ln.setAttribute("x1",X(i)); ln.setAttribute("x2",X(i)); xh.style.display="";
+    tipShow(`<div class="th">${esc(labels[i])}</div>`+series.map(se=>
+      `<div class="tr"><span>${esc(se.name||yLabel||"value")}</span><b>${se.values[i]==null?"—":(fmtV?fmtV(se.values[i]):fmt(se.values[i]))}</b></div>`).join(""),
+      e.clientX,e.clientY);
+  });
+  svg.querySelector(".hover").addEventListener("pointerleave",()=>{xh.style.display="none";tipHide();});
+}
+
+/* --- horizontal ranked bars ---------------------------------------------- */
+function barsH(el,rows,{max,min,unit,mark,fmtV,onClick,sel}={}){
+  const w=W_OF(el), lw=Math.min(160,Math.max(96,Math.round(w*0.32))), vw=52;
+  const bw=w-lw-vw-16;
+  const mn=min||0, mx=(max||Math.max(...rows.map(r=>r.value))*1.02||1);
+  const frac=v=>clamp((v-mn)/(mx-mn||1),0,1);
+  el.innerHTML=`<div class="bars">`+rows.map(r=>{
+    const p=frac(r.value)*100;
+    return `<div class="brow" data-id="${esc(r.id||"")}" ${onClick?'style="cursor:pointer"':""}
+       ${sel&&sel===r.id?'aria-selected="true"':""}>
+      <div class="bn" title="${esc(r.label)}">${mark?markInline(r.mark)+" ":""}${esc(r.label)}</div>
+      <div class="track"><i style="width:${p.toFixed(1)}%${r.hatch?";background:none;background-image:repeating-linear-gradient(135deg,var(--hatch) 0 2px,transparent 2px 5px)":""}"></i>${
+        r.ref!=null?`<u style="left:${(frac(r.ref)*100).toFixed(1)}%"></u>`:""}</div>
+      <div class="bv">${fmtV?fmtV(r.value):fmt(r.value)}</div></div>`;
+  }).join("")+`</div>`;
+  if(onClick) el.querySelectorAll(".brow").forEach(n=>{
+    n.addEventListener("click",()=>onClick(n.dataset.id));
+    n.addEventListener("pointerenter",e=>{ const r=rows.find(x=>x.id===n.dataset.id);
+      if(r&&r.tip) tipShow(r.tip,e.clientX,e.clientY); });
+    n.addEventListener("pointerleave",tipHide);
+  });
+}
+function markInline(kind,size){
+  const s=size||10, cx=s/2, r=s/2-0.6;
+  const wrap=v=>`<svg width="${s}" height="${s}" style="vertical-align:-1px" aria-hidden="true">${v}</svg>`;
+  if(kind==="prime")  return wrap(`<path d="M${cx} ${cx-r} L${cx+r} ${cx} L${cx} ${cx+r} L${cx-r} ${cx} Z" fill="var(--ink)"/>`);
+  if(kind==="strong") return wrap(`<circle cx="${cx}" cy="${cx}" r="${r*0.85}" fill="var(--ink)"/>`);
+  if(kind==="viable") return wrap(`<circle cx="${cx}" cy="${cx}" r="${r*0.85}" fill="none" stroke="var(--ink)" stroke-width="1.3"/><path d="M${cx} ${cx-r*0.85} A ${r*0.85} ${r*0.85} 0 0 1 ${cx} ${cx+r*0.85} Z" fill="var(--ink)"/>`);
+  if(kind==="marg")   return wrap(`<circle cx="${cx}" cy="${cx}" r="${r*0.8}" fill="none" stroke="var(--ink)" stroke-width="1.3"/>`);
+  if(kind==="unsuit") return wrap(`<circle cx="${cx}" cy="${cx}" r="${r*0.8}" fill="none" stroke="var(--ink)" stroke-width="1.2" stroke-dasharray="2.2 2"/>`);
+  if(kind==="champ")  return wrap(`<path d="M${cx} ${cx-r} L${cx+r*0.66} ${cx+r*0.75} L${cx-r*0.66} ${cx+r*0.75} Z" fill="var(--ink)"/>`);
+  return "";
+}
+function classMark(b){ return `<span class="cm">${markInline(b.mark,11)}<span>${b.name}</span></span>`; }
+
+/* --- grouped vertical bars ------------------------------------------------ */
+function barsV(el,{labels,series,fmtV,yLabel,stackHint}){
+  const w=W_OF(el), h=el.dataset.h?+el.dataset.h:236;
+  const m={l:46,r:12,t:22,b:28}, iw=w-m.l-m.r, ih=h-m.t-m.b;
+  const hi=Math.max(...series.flatMap(s=>s.values));
+  const ticks=niceTicks(0,hi*1.06,4), y1=ticks[ticks.length-1];
+  const Y=v=>m.t+ih-(v/y1)*ih;
+  const gw=iw/labels.length, n=series.length, bw=Math.min(26,(gw-8)/n);
+  let s=`<svg class="chart" width="${w}" height="${h}" role="img">`;
+  ticks.forEach(t=>{ s+=`<line class="gridline" x1="${m.l}" x2="${w-m.r}" y1="${Y(t).toFixed(1)}" y2="${Y(t).toFixed(1)}"/>
+    <text x="${m.l-8}" y="${(Y(t)+3.5).toFixed(1)}" text-anchor="end">${fmt(t)}</text>`; });
+  labels.forEach((L,i)=>{
+    const gx=m.l+i*gw+gw/2;
+    series.forEach((se,si)=>{
+      const x=gx-(n*bw+ (n-1)*2)/2 + si*(bw+2), v=se.values[i];
+      const y=Y(v), bh=Math.max(0,m.t+ih-y);
+      const fill=se.hollow?`fill="none" stroke="var(--mark)" stroke-width="1.2"`
+        : se.hatch?`fill="url(#hatch)"` : `fill="var(--mark)" opacity="${se.op||1}"`;
+      s+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" rx="2" ${fill}/>`;
+    });
+    s+=`<text x="${gx.toFixed(1)}" y="${h-9}" text-anchor="middle">${esc(L)}</text>`;
+  });
+  if(stackHint) s+=stackHint(m,iw,ih,Y,gw);
+  s+=`<defs><pattern id="hatch" width="5" height="5" patternTransform="rotate(135)" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="0" x2="0" y2="5" stroke="var(--hatch)" stroke-width="2"/></pattern></defs>`;
+  s+=`<line class="axis" x1="${m.l}" x2="${w-m.r}" y1="${m.t+ih}" y2="${m.t+ih}"/>`;
+  if(yLabel) s+=`<text x="2" y="11" class="axl">${esc(yLabel)}</text>`;
+  s+=`<g class="xh" style="display:none"><rect y="${m.t}" height="${ih}" fill="var(--ink)" opacity=".05"/></g>`;
+  s+=`<rect class="hover" x="${m.l}" y="${m.t}" width="${iw}" height="${ih}"/></svg>`;
+  el.innerHTML=s;
+  const svg=el.firstChild, xh=svg.querySelector(".xh"), rc=xh.querySelector("rect");
+  svg.querySelector(".hover").addEventListener("pointermove",e=>{
+    const r=svg.getBoundingClientRect();
+    const i=clamp(Math.floor((e.clientX-r.left-m.l)/gw),0,labels.length-1);
+    rc.setAttribute("x",m.l+i*gw); rc.setAttribute("width",gw); xh.style.display="";
+    tipShow(`<div class="th">${esc(labels[i])}</div>`+series.map(se=>
+      `<div class="tr"><span>${esc(se.name)}</span><b>${fmtV?fmtV(se.values[i]):fmt(se.values[i])}</b></div>`).join(""),
+      e.clientX,e.clientY);
+  });
+  svg.querySelector(".hover").addEventListener("pointerleave",()=>{xh.style.display="none";tipHide();});
+}
+
+/* --- radar --------------------------------------------------------------- */
+function radar(el,{axes,series}){
+  const w=W_OF(el), h=Math.min(340,Math.max(260,w*0.72));
+  const cx=w/2, cy=h/2+4, R=Math.min(w,h)/2-52;
+  const n=axes.length, ang=i=>-Math.PI/2+i*2*Math.PI/n;
+  let s=`<svg class="chart" width="${w}" height="${h}" role="img">`;
+  [.25,.5,.75,1].forEach(k=>{
+    const p=axes.map((_,i)=>[cx+Math.cos(ang(i))*R*k, cy+Math.sin(ang(i))*R*k]);
+    s+=`<path d="${path(p)} Z" fill="none" class="gridline"/>`;
+  });
+  axes.forEach((a,i)=>{
+    const x=cx+Math.cos(ang(i))*R, y=cy+Math.sin(ang(i))*R;
+    s+=`<line class="gridline" x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"/>`;
+    const lx=cx+Math.cos(ang(i))*(R+22), ly=cy+Math.sin(ang(i))*(R+22);
+    const anc=Math.abs(lx-cx)<6?"middle":lx>cx?"start":"end";
+    s+=`<text x="${lx.toFixed(1)}" y="${(ly+3).toFixed(1)}" text-anchor="${anc}">${esc(a)}</text>`;
+  });
+  series.forEach((se,si)=>{
+    const p=se.values.map((v,i)=>[cx+Math.cos(ang(i))*R*clamp(v,0,1), cy+Math.sin(ang(i))*R*clamp(v,0,1)]);
+    if(!si) s+=`<path d="${path(p)} Z" class="area"/>`;
+    s+=`<path d="${path(p)} Z" class="ser${si?" b":""}"/>`;
+    p.forEach((q,i)=>s+=`<circle class="dot${si?" hollow":""}" cx="${q[0].toFixed(1)}" cy="${q[1].toFixed(1)}" r="${si?2.8:3.2}"/>`);
+  });
+  s+=`</svg>`; el.innerHTML=s;
+}
+
+/* --- scatter ------------------------------------------------------------- */
+function scatter(el,{points,xLabel,yLabel,onClick,sel}){
+  const w=W_OF(el), h=el.dataset.h?+el.dataset.h:300;
+  const m={l:48,r:16,t:24,b:34}, iw=w-m.l-m.r, ih=h-m.t-m.b;
+  const xs=points.map(p=>p.x), ys=points.map(p=>p.y);
+  const xt=niceTicks(Math.min(...xs)*0.95,Math.max(...xs)*1.03,4);
+  const yt=niceTicks(Math.min(...ys)-4,Math.max(...ys)+4,4);
+  const X=v=>m.l+(v-xt[0])/(xt[xt.length-1]-xt[0])*iw;
+  const Y=v=>m.t+ih-(v-yt[0])/(yt[yt.length-1]-yt[0])*ih;
+  let s=`<svg class="chart" width="${w}" height="${h}" role="img">`;
+  yt.forEach(t=>s+=`<line class="gridline" x1="${m.l}" x2="${w-m.r}" y1="${Y(t).toFixed(1)}" y2="${Y(t).toFixed(1)}"/>
+    <text x="${m.l-8}" y="${(Y(t)+3.5).toFixed(1)}" text-anchor="end">${fmt(t)}</text>`);
+  xt.forEach(t=>s+=`<text x="${X(t).toFixed(1)}" y="${h-16}" text-anchor="middle">${fmt(t)}</text>`);
+  BANDS.map(b=>b.min).filter(v=>v>0).forEach(b=>{ if(b<yt[0]||b>yt[yt.length-1])return;
+    s+=`<line x1="${m.l}" x2="${w-m.r}" y1="${Y(b).toFixed(1)}" y2="${Y(b).toFixed(1)}" stroke="var(--line2)" stroke-width="1" stroke-dasharray="2 3"/>
+        <text x="${w-m.r-2}" y="${(Y(b)-4).toFixed(1)}" text-anchor="end">${band(b).name}</text>`; });
+  points.forEach(p=>{
+    const r=clamp(Math.sqrt(p.size||60)/3.4,4,15);
+    s+=`<circle data-id="${esc(p.id)}" cx="${X(p.x).toFixed(1)}" cy="${Y(p.y).toFixed(1)}" r="${r.toFixed(1)}"
+      ${p.solid?`fill="var(--mark)" opacity=".82"`:`fill="var(--paper)" stroke="var(--mark)" stroke-width="1.6"`}
+      style="cursor:pointer${sel===p.id?";stroke:var(--ink);stroke-width:2.6":""}"/>`;
+  });
+  s+=`<line class="axis" x1="${m.l}" x2="${w-m.r}" y1="${m.t+ih}" y2="${m.t+ih}"/>
+      <text x="${(m.l+iw/2).toFixed(1)}" y="${h-2}" text-anchor="middle" class="axl">${esc(xLabel)}</text>
+      <text x="2" y="12" class="axl">${esc(yLabel)}</text></svg>`;
+  el.innerHTML=s;
+  el.querySelectorAll("circle[data-id]").forEach(c=>{
+    const p=points.find(x=>x.id===c.dataset.id);
+    c.addEventListener("pointerenter",e=>tipShow(p.tip,e.clientX,e.clientY));
+    c.addEventListener("pointerleave",tipHide);
+    if(onClick) c.addEventListener("click",()=>onClick(p.id));
+  });
+}
+
+/* --- density strip / phenology heat -------------------------------------- */
+function heatStrip(el,rows,{max,cols,fmtV,label,rowMax}={}){
+  const CS=cols||MON, gmx=max||3;
+  el.innerHTML=`<table><thead><tr><th>${esc(label||"Stage")}</th>`+
+    CS.map(c=>`<th class="m">${esc(c)}</th>`).join("")+`</tr></thead><tbody>`+
+    rows.map(([n,vals])=>{const mx=rowMax?(Math.max(...vals)||1):gmx;
+    return `<tr><td class="rn">${esc(n)}</td>`+vals.map((v,i)=>{
+      const t=clamp(v/mx,0,1);
+      const bg=t<=0?"transparent":`color-mix(in srgb, var(--ink) ${Math.round(8+t*84)}%, var(--paper))`;
+      const fg=t>0.45?"var(--paper)":(t>0?"var(--ink)":"var(--ink4)");
+      return `<td class="c" style="background:${bg}" data-t="${esc(n)}" data-m="${esc(CS[i])}" data-v="${v}">
+        <div class="cell" style="color:${fg}">${v>0?(fmtV?fmtV(v):""):""}</div></td>`;
+    }).join("")+`</tr>`;}).join("")+`</tbody></table>`;
+  el.querySelectorAll("td.c").forEach(td=>{
+    td.addEventListener("pointerenter",e=>tipShow(
+      `<div class="th">${esc(td.dataset.t)}</div><div class="tr"><span>${esc(td.dataset.m)}</span><b>${
+        fmtV?fmtV(+td.dataset.v):["none","low","active","peak"][+td.dataset.v]||td.dataset.v}</b></div>`,
+      e.clientX,e.clientY));
+    td.addEventListener("pointerleave",tipHide);
+  });
+}
+function spark(values,w,h){
+  w=w||78; h=h||20;
+  const lo=Math.min(...values), hi=Math.max(...values), r=hi-lo||1;
+  const pts=values.map((v,i)=>[i/(values.length-1)*(w-3)+1.5, h-2-((v-lo)/r)*(h-5)]);
+  return `<svg width="${w}" height="${h}" style="display:block" aria-hidden="true">
+    <path d="${path(pts)}" fill="none" stroke="var(--ink)" stroke-width="1.3" stroke-linejoin="round"/>
+    <circle cx="${pts[pts.length-1][0].toFixed(1)}" cy="${pts[pts.length-1][1].toFixed(1)}" r="2" fill="var(--ink)"/></svg>`;
+}
+</script>
+
+<script>
+"use strict";
+/* =====================================================================
+   Application
+   ===================================================================== */
+const TABS=[
+  {id:"ops",label:"Operations",title:"Portfolio overview",crumb:"Operations",
+   icon:'<path d="M2 12h3V7h3v5h3V4h3v8" fill="none" stroke="currentColor" stroke-width="1.4"/>'},
+  {id:"exp",label:"Expansion",title:"Site recommendations",crumb:"Expansion",
+   icon:'<path d="M7.5 1.5 13 13H2z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>'},
+  {id:"ymn",label:"Yemen benchmark",title:"Reference belt analysis",crumb:"Benchmark",
+   icon:'<circle cx="7.5" cy="7.5" r="5.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M1.9 7.5h11.2M7.5 1.9c2.6 3 2.6 8.2 0 11.2M7.5 1.9c-2.6 3-2.6 8.2 0 11.2" fill="none" stroke="currentColor" stroke-width="1.1"/>'},
+  {id:"ter",label:"Terroir match",title:"Pair comparison",crumb:"Terroir",
+   icon:'<circle cx="5.4" cy="7.5" r="4.2" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="9.6" cy="7.5" r="4.2" fill="none" stroke="currentColor" stroke-width="1.4"/>'},
+  {id:"cyc",label:"Crop cycle",title:"Vegetation calendar",crumb:"Cycle",
+   icon:'<path d="M7.5 13c0-4 2-7 5.5-8-1 4-3 6-5.5 8zM7.5 13c0-3.4-1.6-6-4.5-7 .8 3.4 2.4 5.2 4.5 7z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>'},
+  {id:"mdl",label:"Scoring model",title:"How the score is built",crumb:"Model",
+   icon:'<path d="M2 11.5h11M4.5 11.5V6M7.5 11.5V3M10.5 11.5V8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>'}
+];
+const S={
+  tab:"ops", ksaSel:"sa-day", yemSel:"ym-har", expSel:"ca-qah",
+  unit:"kg", filters:{score:0,elev:0,water:900,region:"",status:""},
+  terA:"ca-qah", terB:null, cycRegime:"ksa", cycSite:"sa-day",
+  opsLayer:"relief", expLayer:"relief", ymnLayer:"relief", ymnYieldMode:"belt",
+  opsQuery:"", expSort:{k:"score",dir:-1}, opsSort:{k:"y25",dir:-1}
+};
+const maps={};
+
+/* ---------- units ---------- */
+const toUnit=v=>S.unit==="kg"?v:v/60;
+const unitLbl=()=>S.unit==="kg"?"kg/ha":"bags/ha";
+const fmtY=v=>S.unit==="kg"?fmt(v):fmt(v/60,1);
+
+/* ---------- nav ---------- */
+const nav=document.getElementById("nav");
+nav.innerHTML=TABS.map((t,i)=>`<button class="navbtn" role="tab" id="t-${t.id}" data-tab="${t.id}"
+  aria-selected="${t.id===S.tab}" aria-controls="v-${t.id}">
+  <svg width="15" height="15" viewBox="0 0 15 15" aria-hidden="true">${t.icon}</svg>
+  <span>${t.label}</span><span class="navk">${i+1}</span></button>`).join("");
+nav.addEventListener("click",e=>{ const b=e.target.closest("[data-tab]"); if(b) go(b.dataset.tab); });
+addEventListener("keydown",e=>{
+  if(e.target.matches("input,select,textarea")) return;
+  const i=+e.key; if(i>=1&&i<=TABS.length) go(TABS[i-1].id);
+});
+function go(id){
+  S.tab=id;
+  nav.querySelectorAll("[data-tab]").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===id));
+  TABS.forEach(t=>document.getElementById("v-"+t.id).classList.toggle("on",t.id===id));
+  const t=TABS.find(t=>t.id===id);
+  document.getElementById("vtitle").textContent=t.title;
+  document.getElementById("crumb").textContent=t.crumb;
+  render();
+  requestAnimationFrame(()=>Object.values(maps).forEach(m=>m.resize()));
+}
+
+/* ---------- header controls ---------- */
+document.getElementById("unitBtn").addEventListener("click",e=>{
+  S.unit=S.unit==="kg"?"bags":"kg";
+  e.currentTarget.setAttribute("aria-pressed",S.unit==="bags");
+  document.getElementById("unitLbl").textContent=unitLbl();
+  render();
+});
+const THEMES=["auto","light","dark"];
+let themeIdx=0;
+document.getElementById("themeBtn").addEventListener("click",()=>{
+  themeIdx=(themeIdx+1)%3; const t=THEMES[themeIdx];
+  if(t==="auto") document.documentElement.removeAttribute("data-theme");
+  else document.documentElement.setAttribute("data-theme",t);
+  document.getElementById("themeLbl").textContent=t[0].toUpperCase()+t.slice(1);
+  Object.values(maps).forEach(m=>{ m.schedule(true); if(m.gmap) m.gmap.setOptions({styles:googleStyles(isDark())}), m.syncGoogle(); });
+  render();
+});
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>{
+  if(themeIdx===0){ Object.values(maps).forEach(m=>m.schedule(true)); render(); }
+});
+
+/* ---------- map plumbing ---------- */
+function getMap(hostId,scope){
+  if(maps[hostId]) return maps[hostId];
+  const host=document.getElementById(hostId);
+  const m=new TerrainMap(host); m.scope=scope; m.setScope(scope);
+  m.onSelect=id=>selectSite(id);
+  installMapControls(m,host);
+  maps[hostId]=m; return m;
+}
+/* Safari throws on localStorage over file://, which is exactly how the packaged
+   app is opened, so every access is guarded and simply degrades to "no key". */
+const store={
+  get(k){ try{ return localStorage.getItem(k)||""; }catch(e){ return ""; } },
+  set(k,v){ try{ localStorage.setItem(k,v); return true; }catch(e){ return false; } },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+};
+function installMapControls(m,host){
+  const c=document.createElement("div"); c.className="mapctl";
+  c.innerHTML=`<div class="row"><button class="mbtn" data-a="in" title="Zoom in" aria-label="Zoom in">+</button>
+    <button class="mbtn" data-a="out" title="Zoom out" aria-label="Zoom out">−</button>
+    <button class="mbtn" data-a="home" title="Reset view" aria-label="Reset view">⌂</button></div>
+    <div class="row"><button class="mbtn w" data-a="google" aria-pressed="false">Google map</button></div>`;
+  const notice=document.createElement("div"); notice.className="gnotice";
+  const scale=document.createElement("div"); scale.className="scalebar";
+  scale.innerHTML=`<span id="sb-${host.id}">—</span><div class="bar"></div>`;
+  const legend=document.createElement("div"); legend.className="maplegend";
+  legend.innerHTML=`<div class="t">Suitability class</div>`+
+    BANDS.map(b=>`<div class="cm">${markInline(b.mark,11)}<span>${b.name}</span></div>`).join("")+
+    `<div class="cm" style="border-top:1px solid var(--line);padding-top:6px;margin-top:2px">${markInline("champ",11)}<span>Yemen reference</span></div>`;
+  host.append(c,notice,scale,legend);
+  c.addEventListener("click",e=>{
+    const b=e.target.closest("[data-a]"); if(!b) return;
+    const a=b.dataset.a;
+    if(a==="in") m.zoom(0.66);
+    if(a==="out") m.zoom(1.5);
+    if(a==="home") m.setScope(m.scope);
+    if(a==="google"){
+      if(host.classList.contains("gmode")){ m.disableGoogle(); b.setAttribute("aria-pressed","false");
+        b.textContent="Google map"; notice.classList.remove("on"); return; }
+      const key=store.get("gmapsKey");
+      if(!key){ askKey(m,host,notice,b); return; }
+      tryGoogle(m,host,notice,b,key);
+    }
+    updateScale(m,host);
+  });
+  const upd=()=>updateScale(m,host);
+  host.addEventListener("pointerup",upd); host.addEventListener("wheel",upd,{passive:true});
+  new ResizeObserver(upd).observe(host);
+  setTimeout(upd,300);
+}
+function updateScale(m,host){
+  const el=document.getElementById("sb-"+host.id); if(!el) return;
+  const g=m.geo, degPer90px=90/g.w*g.dLon;
+  const km=degPer90px*111*Math.cos(m.center.lat*Math.PI/180);
+  el.textContent=(km<1?`${Math.round(km*1000)} m`:`${km<10?km.toFixed(1):Math.round(km)} km`);
+}
+function askKey(m,host,notice,btn){
+  notice.classList.add("on");
+  notice.innerHTML=`<b>Live Google Maps</b> — paste a Maps JavaScript API key to swap the built-in
+    relief model for Google's satellite and terrain imagery. The key is kept in this browser only.
+    <div style="display:flex;gap:6px;margin-top:8px">
+      <input type="text" id="gk-${host.id}" placeholder="AIza…" style="flex:1" aria-label="Google Maps API key">
+      <button class="chip" data-go="1">Load</button><button class="chip" data-cancel="1">Cancel</button></div>
+    <div class="note" style="margin-top:6px">Published artifacts block third-party map scripts, so this
+      works when the file is served from your own domain or opened locally.</div>`;
+  notice.querySelector("[data-cancel]").onclick=()=>notice.classList.remove("on");
+  notice.querySelector("[data-go]").onclick=()=>{
+    const k=notice.querySelector("input").value.trim(); if(!k) return;
+    store.set("gmapsKey",k); tryGoogle(m,host,notice,btn,k);
+  };
+}
+function tryGoogle(m,host,notice,btn,key){
+  notice.classList.add("on");
+  notice.innerHTML=`<b>Loading Google Maps…</b>`;
+  m.enableGoogle(key).then(()=>{
+    notice.classList.remove("on");
+    btn.setAttribute("aria-pressed","true"); btn.textContent="Relief model";
+  }).catch(err=>{
+    host.classList.remove("gmode");
+    notice.innerHTML=`<b>Google Maps could not load (${esc(err.message)}).</b>
+      ${err.message==="auth"?"The key was rejected — check that the Maps JavaScript API is enabled and the referrer is allowed."
+        :"The request was blocked before it reached Google, which is what happens inside a published artifact sandbox."}
+      Staying on the built-in relief model.
+      <div style="margin-top:8px;display:flex;gap:6px">
+        <button class="chip" data-again="1">Use a different key</button>
+        <button class="chip" data-cancel="1">Dismiss</button></div>`;
+    notice.querySelector("[data-cancel]").onclick=()=>notice.classList.remove("on");
+    notice.querySelector("[data-again]").onclick=()=>{store.del("gmapsKey");askKey(m,host,notice,btn);};
+  });
+}
+function selectSite(id){
+  const s=byId[id]; if(!s) return;
+  if(s.country==="YE"){ S.yemSel=id; if(S.tab==="ter") S.terB=id; }
+  else { S.ksaSel=id; S.expSel=id; if(S.tab==="ter") S.terA=id; }
+  if(S.tab==="exp") S.expSel=id;
+  render();
+}
+
+/* ---------- shared fragments ---------- */
+function statTile(lab,val,unit,foot){
+  return `<div class="panel stat"><div class="lab">${esc(lab)}</div>
+    <div class="val">${val}${unit?`<small>${esc(unit)}</small>`:""}</div>
+    ${foot?`<div class="foot">${foot}</div>`:""}</div>`;
+}
+function kv(pairs){
+  return `<div class="kv">`+pairs.map(([k,v])=>`<div>${esc(k)}</div><div>${v}</div>`).join("")+`</div>`;
+}
+function scoreDial(v,b,conf){
+  const r=26, C=2*Math.PI*r, p=clamp(v,0,100)/100;
+  return `<div class="scoredial">
+    <svg width="66" height="66" viewBox="0 0 66 66" aria-hidden="true">
+      <circle cx="33" cy="33" r="${r}" fill="none" stroke="var(--surface3)" stroke-width="5"/>
+      <circle cx="33" cy="33" r="${r}" fill="none" stroke="var(--ink)" stroke-width="5"
+        stroke-linecap="round" stroke-dasharray="${(C*p).toFixed(1)} ${C.toFixed(1)}"
+        transform="rotate(-90 33 33)"/></svg>
+    <div><div class="big">${v.toFixed(1)}<small>/100</small></div>
+      <div style="margin-top:4px">${classMark(b)}</div>
+      ${conf!=null?`<div class="note" style="margin-top:3px">Confidence ${conf.toFixed(0)}%</div>`:""}</div>
+  </div>`;
+}
+function monthly(s){
+  const rs=[.02,.03,.09,.15,.11,.05,.09,.17,.12,.09,.05,.03];
+  const ss=[1.02,1.06,1.05,1.00,1.02,1.07,0.96,0.88,0.97,1.05,1.03,1.00];
+  const kc=[0.90,0.85,0.95,1.05,1.10,1.15,1.15,1.10,1.05,1.00,0.95,0.90];
+  const tAmp=3.0+(s.diurnal-14)*0.22;
+  const rain=rs.map(f=>Math.round(s.rain*f));
+  const temp=MON.map((_,m)=>+(s.tmean - tAmp*Math.cos(2*Math.PI*m/12)).toFixed(1));
+  const sunD=ss.map(f=>+((s.sun/365)*f).toFixed(1));
+  const eff=rs.map((f,m)=>Math.round(s.rain*f*0.72 + s.fog*2.2*f));
+  const w=temp.map((t,m)=>(t+8)*ss[m]*kc[m]);
+  const tot=w.reduce((a,b)=>a+b,0), E=etc(s);
+  const etcM=w.map(v=>Math.round(v/tot*E));
+  const irr=etcM.map((v,m)=>Math.max(0,v-eff[m]));
+  return {rain,temp,sunD,eff,etcM,irr,kc};
+}
+</script>
+
+<script>
+"use strict";
+/* =====================================================================
+   Views
+   ===================================================================== */
+const $=id=>document.getElementById(id);
+
+/* ---------------- 1. OPERATIONS ---------------- */
+function renderOps(){
+  const est=KSA().filter(r=>r.status==="established");
+  const ha=est.reduce((a,r)=>a+r.ha,0);
+  const out25=est.reduce((a,r)=>a+r.yieldHist[10]*r.ha,0)/1000;
+  const out24=est.reduce((a,r)=>a+r.yieldHist[9]*r.ha,0)/1000;
+  const meanScore=est.reduce((a,r)=>a+r.score,0)/est.length;
+  const water=est.reduce((a,r)=>a+r.irr*10*r.ha,0)/1e6;
+  const meanY=est.reduce((a,r)=>a+r.yieldHist[10]*r.ha,0)/ha;
+
+  $("opsKpi").innerHTML=[
+    statTile("Producing estates",est.length,"sites",
+      `<span>${new Set(est.map(e=>e.admin)).size} regions · ${fmt(est.reduce((a,r)=>a+r.holdings,0))} holdings</span>`),
+    statTile("Planted area",fmt(ha),"ha",`<span>Mean block ${fmt(ha/est.length)} ha</span>`),
+    statTile("2025 green output",fmt(out25,0),"t",
+      `<span class="d">${out25>=out24?"+":""}${((out25/out24-1)*100).toFixed(1)}%</span><span>vs 2024</span>`),
+    statTile("Mean yield",fmtY(meanY),unitLbl(),
+      `<span>${spark(YEARS.map((_,i)=>est.reduce((a,r)=>a+r.yieldHist[i]*r.ha,0)/ha))}</span>`),
+    statTile("Irrigation draw",fmt(water,1),"Mm³/yr",
+      `<span>${fmt(est.reduce((a,r)=>a+r.irr*r.ha,0)/ha)} mm mean deficit</span>`)
+  ].join("");
+
+  const m=getMap("map-ops","ksa");
+  m.setLayer(S.opsLayer); m.setSites(est); m.select(S.ksaSel);
+
+  barsH($("opsEstateBars"),
+    est.slice().sort((a,b)=>b.yieldHist[10]*b.ha-a.yieldHist[10]*a.ha).map(r=>({
+      id:r.id,label:r.name,value:Math.round(r.yieldHist[10]*r.ha/1000),mark:r.band.mark,
+      tip:`<div class="th">${esc(r.name)}</div>
+        <div class="tr"><span>Area</span><b>${fmt(r.ha)} ha</b></div>
+        <div class="tr"><span>Yield</span><b>${fmtY(r.yieldHist[10])} ${unitLbl()}</b></div>
+        <div class="tr"><span>Score</span><b>${r.score.toFixed(1)}</b></div>`
+    })),{mark:true,unit:"t",fmtV:v=>fmt(v)+" t",onClick:selectSite,sel:S.ksaSel});
+
+  const alerts=[];
+  est.forEach(r=>{ risks(r).forEach(([t,d])=>{ if(t!=="None material") alerts.push({site:r,t,d}); }); });
+  const order={"Water security":0,"Rainfall deficit":1,"Heat":2,"Frost":3,"Soil":4,"Terrain":5,"Logistics":6};
+  alerts.sort((a,b)=>(order[a.t]??9)-(order[b.t]??9));
+  $("opsAlerts").innerHTML=alerts.slice(0,5).map(a=>`
+    <div class="pill"><span class="ic">${markInline(a.site.band.mark,11)}</span>
+      <span><b style="font-weight:600">${esc(a.site.name)} — ${esc(a.t)}.</b> ${esc(a.d)}</span></div>`).join("")
+    || `<div class="pill">No estate is outside tolerance under the current weighting.</div>`;
+
+  const kingdom=YEARS.map((_,i)=>+(est.reduce((a,r)=>a+r.yieldHist[i]*r.ha,0)/1000).toFixed(1));
+  const cagr=(Math.pow(kingdom[10]/kingdom[0],1/10)-1)*100;
+  $("opsCagr").textContent=`CAGR ${cagr.toFixed(1)}%`;
+  $("opsTrend").dataset.h=236;
+  lineChart($("opsTrend"),{labels:YEARS.map(String),
+    series:[{name:"Kingdom",values:kingdom,area:true}],yLabel:"tonnes",fmtV:v=>fmt(v,1)+" t"});
+
+  $("opsWater").dataset.h=236;
+  barsV($("opsWater"),{labels:est.map(r=>shortName(r.name)),
+    series:[{name:"Effective rain + dew",values:est.map(r=>Math.round(r.eff))},
+            {name:"Irrigation requirement",values:est.map(r=>Math.round(r.irr)),hatch:true}],
+    yLabel:"mm",fmtV:v=>fmt(v)+" mm"});
+
+  const cols=[["name","Estate"],["admin","Region"],["elev","Elev m"],["ha","Area ha"],
+    ["y25","2025 yield"],["trend","2015–25"],["score","AI score"],["band","Class"],["irr","Irrigation mm"]];
+  const rows=est.filter(r=>!S.opsQuery||
+      (r.name+r.admin+r.variety).toLowerCase().includes(S.opsQuery.toLowerCase()))
+    .map(r=>({r,name:r.name,admin:r.admin,elev:r.elev,ha:r.ha,y25:r.yieldHist[10],
+      score:r.score,band:r.band.name,irr:Math.round(r.irr)}));
+  const sk=S.opsSort.k, sd=S.opsSort.dir;
+  rows.sort((a,b)=>{const x=a[sk],y=b[sk];
+    return (typeof x==="string"?x.localeCompare(y):x-y)*sd;});
+  $("opsTable").innerHTML=`<table><thead><tr>`+cols.map(([k,l])=>
+    `<th class="${["elev","ha","y25","score","irr"].includes(k)?"n ":""}${k!=="trend"&&k!=="band"?"sortable":""}"
+      ${k!=="trend"&&k!=="band"?`data-sort="${k}" ${sk===k?`data-dir="${sd}"`:""}`:""}>${l}${
+      k!=="trend"&&k!=="band"?`<span class="car">${sk===k?(sd>0?"▲":"▼"):"↕"}</span>`:""}</th>`).join("")+
+    `</tr></thead><tbody>`+rows.map(({r})=>`<tr data-id="${r.id}" ${S.ksaSel===r.id?'aria-selected="true"':""}>
+      <td style="font-weight:500">${esc(r.name)}</td><td style="color:var(--ink3)">${esc(r.admin)}</td>
+      <td class="n num">${fmt(r.elev)}</td><td class="n num">${fmt(r.ha)}</td>
+      <td class="n num">${fmtY(r.yieldHist[10])}</td><td>${spark(r.yieldHist,66,18)}</td>
+      <td class="n num">${r.score.toFixed(1)}</td><td>${classMark(r.band)}</td>
+      <td class="n num">${fmt(r.irr)}</td></tr>`).join("")+`</tbody></table>`;
+  $("opsTable").querySelectorAll("tbody tr").forEach(tr=>tr.onclick=()=>selectSite(tr.dataset.id));
+  $("opsTable").querySelectorAll("[data-sort]").forEach(th=>th.onclick=()=>{
+    const k=th.dataset.sort; S.opsSort = sk===k?{k,dir:-sd}:{k,dir:k==="name"||k==="admin"?1:-1}; renderOps();});
+}
+$("opsSearch").addEventListener("input",e=>{S.opsQuery=e.target.value;renderOps();});
+$("opsLayer").addEventListener("click",e=>{const b=e.target.closest("[data-layer]");if(!b)return;
+  S.opsLayer=b.dataset.layer;
+  $("opsLayer").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));renderOps();});
+
+/* ---------------- 2. EXPANSION ---------------- */
+function filtered(){
+  const f=S.filters;
+  return KSA().filter(r=>r.score>=f.score && r.elev>=f.elev && r.irr<=f.water
+    && (!f.region||r.admin===f.region) && (!f.status||r.status===f.status));
+}
+function renderExp(){
+  const all=KSA(), list=filtered();
+  const cand=list.filter(r=>r.status==="candidate");
+  const good=list.filter(r=>r.score>=66);
+  const plantable=cand.reduce((a,r)=>a+r.ha,0);
+  const upside=cand.filter(r=>r.score>=54).reduce((a,r)=>a+r.pot*r.ha,0)/1000;
+  const meanMatch=list.length?list.reduce((a,r)=>a+r.analogue.match,0)/list.length:0;
+
+  $("expKpi").innerHTML=[
+    statTile("Parcels in scope",list.length,`of ${all.length}`,
+      `<span>${cand.length} candidate · ${list.length-cand.length} established</span>`),
+    statTile("Prime or strong",good.length,"parcels",
+      `<span>${good.length?esc(good.slice().sort((a,b)=>b.score-a.score)[0].name)+" leads":"none under these filters"}</span>`),
+    statTile("Plantable area",fmt(plantable),"ha",`<span>Greenfield only, terraces excluded</span>`),
+    statTile("Output at maturity",fmt(upside,0),"t/yr",
+      `<span>Year 6 · ${fmt(meanMatch,0)}% mean Yemen match</span>`)
+  ].join("");
+
+  const m=getMap("map-exp","both");
+  m.setLayer(S.expLayer);
+  m.setSites([...list,...YEM()]);
+  m.setLinks(S.expLayer==="analogue"
+    ? list.filter(r=>r.status==="candidate").map(r=>[r.id,r.analogue.id,r.analogue.match/100]) : []);
+  m.select(S.expSel);
+
+  renderDossier($("expDetail"), byId[S.expSel]?rec(byId[S.expSel]):list[0]);
+
+  const rank=list.slice().sort((a,b)=>b.score-a.score).slice(0,12);
+  barsH($("expRank"),rank.map(r=>({id:r.id,label:r.name,value:+r.score.toFixed(1),mark:r.band.mark,
+    hatch:r.status==="candidate", ref:rec(byId[r.analogue.id]).score,
+    tip:`<div class="th">${esc(r.name)}</div>
+      <div class="tr"><span>Class</span><b>${r.band.name}</b></div>
+      <div class="tr"><span>Analogue</span><b>${esc(r.analogue.name)}</b></div>
+      <div class="tr"><span>Match</span><b>${r.analogue.match.toFixed(0)}%</b></div>
+      <div class="tr"><span>Reference score</span><b>${rec(byId[r.analogue.id]).score.toFixed(1)}</b></div>`})),
+    {mark:true,max:100,fmtV:v=>v.toFixed(1),onClick:selectSite,sel:S.expSel});
+  $("expRank").insertAdjacentHTML("beforeend",
+    `<div class="note" style="margin-top:12px">Hatched bars are greenfield candidates; solid bars are
+     producing estates. The tick on each track is the score of that parcel's closest Yemen analogue —
+     a bar reaching its tick means the Saudi parcel matches the reference district it was paired with.</div>`);
+
+  $("expScatter").dataset.h=300;
+  scatter($("expScatter"),{
+    points:[...list.map(r=>({id:r.id,x:r.elev,y:r.score,size:r.ha,solid:false,
+      tip:`<div class="th">${esc(r.name)}</div>
+        <div class="tr"><span>Elevation</span><b>${fmt(r.elev)} m</b></div>
+        <div class="tr"><span>Score</span><b>${r.score.toFixed(1)}</b></div>
+        <div class="tr"><span>Area</span><b>${fmt(r.ha)} ha</b></div>`})),
+      ...YEM().map(r=>({id:r.id,x:r.elev,y:r.score,size:r.ha,solid:true,
+      tip:`<div class="th">${esc(r.name)} · Yemen</div>
+        <div class="tr"><span>Elevation</span><b>${fmt(r.elev)} m</b></div>
+        <div class="tr"><span>Score</span><b>${r.score.toFixed(1)}</b></div>
+        <div class="tr"><span>Cup</span><b>${r.cup}</b></div>`}))],
+    xLabel:"Elevation (m)",yLabel:"AI suitability score",onClick:selectSite,sel:S.expSel});
+
+  const cols=[["rank","#"],["name","Parcel"],["admin","Region"],["status","Status"],["elev","Elev m"],
+    ["score","Score"],["band","Class"],["ana","Yemen analogue"],["match","Match"],
+    ["pot","Potential yield"],["ha","Area ha"],["irr","Irrig. mm"],["capex","Capex SAR/ha"],["conf","Conf."]];
+  const rows=list.map(r=>({r,name:r.name,admin:r.admin,status:r.status,elev:r.elev,score:r.score,
+    band:r.band.name,ana:r.analogue.name,match:r.analogue.match,pot:r.pot,ha:r.ha,
+    irr:Math.round(r.irr),capex:r.capex,conf:r.conf}));
+  const sk=S.expSort.k,sd=S.expSort.dir;
+  if(sk!=="rank") rows.sort((a,b)=>{const x=a[sk],y=b[sk];
+    return (typeof x==="string"?x.localeCompare(y):x-y)*sd;});
+  else rows.sort((a,b)=>(b.score-a.score));
+  $("expTable").innerHTML=`<table><thead><tr>`+cols.map(([k,l])=>{
+    const n=["elev","score","match","pot","ha","irr","capex","conf","rank"].includes(k);
+    const sortable=k!=="band"&&k!=="rank";
+    return `<th class="${n?"n ":""}${sortable?"sortable":""}" ${sortable?`data-sort="${k}" ${sk===k?`data-dir="${sd}"`:""}`:""}>${l}${
+      sortable?`<span class="car">${sk===k?(sd>0?"▲":"▼"):"↕"}</span>`:""}</th>`;}).join("")+
+    `</tr></thead><tbody>`+rows.map((row,i)=>{const r=row.r;return `
+    <tr data-id="${r.id}" ${S.expSel===r.id?'aria-selected="true"':""}>
+      <td class="n num" style="color:var(--ink4)">${i+1}</td>
+      <td style="font-weight:500">${esc(r.name)}</td>
+      <td style="color:var(--ink3)">${esc(r.admin)}</td>
+      <td><span class="tag${r.status==="established"?" solid":""}">${r.status}</span></td>
+      <td class="n num">${fmt(r.elev)}</td>
+      <td class="n num" style="font-weight:600">${r.score.toFixed(1)}</td>
+      <td>${classMark(r.band)}</td>
+      <td style="color:var(--ink2)">${esc(r.analogue.name)}</td>
+      <td class="n"><div style="display:flex;align-items:center;gap:7px;justify-content:flex-end">
+        <span class="meter" style="width:44px"><i style="width:${r.analogue.match.toFixed(0)}%"></i></span>
+        <span class="num">${r.analogue.match.toFixed(0)}%</span></div></td>
+      <td class="n num">${fmtY(r.pot)}</td>
+      <td class="n num">${fmt(r.ha)}</td>
+      <td class="n num">${fmt(r.irr)}</td>
+      <td class="n num">${fmt(r.capex)}</td>
+      <td class="n"><div style="display:flex;align-items:center;gap:7px;justify-content:flex-end">
+        <span class="meter hatched" style="width:38px"><i style="width:${r.conf.toFixed(0)}%"></i></span>
+        <span class="num">${r.conf.toFixed(0)}</span></div></td></tr>`;}).join("")+`</tbody></table>`;
+  $("expTable").querySelectorAll("tbody tr").forEach(tr=>tr.onclick=()=>selectSite(tr.dataset.id));
+  $("expTable").querySelectorAll("[data-sort]").forEach(th=>th.onclick=()=>{
+    const k=th.dataset.sort; S.expSort= sk===k?{k,dir:-sd}:{k,dir:["name","admin","status","ana"].includes(k)?1:-1};
+    renderExp();});
+}
+function renderDossier(el,r){
+  if(!r){ el.innerHTML=`<div class="ph"><h3>No parcel selected</h3></div>
+    <div class="pb"><p class="note">No parcel passes the current filters. Widen them to see a dossier.</p></div>`; return; }
+  const ana=rec(byId[r.analogue.id]);
+  const rk=risks(r);
+  const top=F.map(f=>({f,v:SUBS[r.id][f],w:W[f]})).sort((a,b)=>b.v-a.v||b.w-a.w);
+  el.innerHTML=`
+    <div class="ph"><h3>${esc(r.name)}</h3><span class="cap">${esc(r.admin)} · ${r.country==="YE"?"Yemen":"Saudi Arabia"}</span>
+      <div class="right"><span class="tag${r.status==="established"?" solid":""}">${r.status}</span></div></div>
+    <div class="section">${scoreDial(r.score,r.band,r.conf)}
+      <p class="note" style="margin:11px 0 0">${esc(r.band.txt)}</p></div>
+    <div class="section"><h4>Closest Yemen analogue</h4>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="flex:1"><div style="font-weight:600;font-size:13px">${esc(ana.name)}</div>
+          <div class="note">${esc(ana.admin)} · ${fmt(ana.elev)} m · cup ${ana.cup}</div></div>
+        <div style="text-align:right"><div class="num" style="font-size:22px;font-weight:600;letter-spacing:-.03em">${r.analogue.match.toFixed(0)}%</div>
+          <div class="note">terroir match</div></div></div>
+      <div class="meter" style="margin-top:9px"><i style="width:${r.analogue.match.toFixed(0)}%"></i></div>
+      <p class="note" style="margin:9px 0 0">${esc(r.note)}</p></div>
+    <div class="section"><h4>Site record</h4>${kv([
+      ["Coordinates",`${r.lat.toFixed(3)}°N ${r.lon.toFixed(3)}°E`],
+      ["Elevation",`${fmt(r.elev)} m`],
+      ["Slope / aspect",`${r.slope}% · ${r.aspect}`],
+      ["Mean temperature",`${r.tmean.toFixed(1)} °C`],
+      ["Diurnal range",`${r.diurnal} °C`],
+      ["Rainfall",`${fmt(r.rain)} mm`],
+      ["Fog / dew days",`${r.fog}`],
+      ["Crop water demand",`${fmt(r.etc)} mm`],
+      ["Net irrigation",`${fmt(r.irr)} mm · ${fmt(r.irr*10)} m³/ha`],
+      ["Soil",`pH ${r.ph.toFixed(1)} · ${r.depth} cm`],
+      ["Sunshine",`${fmt(r.sun)} h/yr`],
+      ["Frost nights",`${r.frost}`],
+      ["Days above 32 °C",`${r.heat}`],
+      [r.status==="candidate"?"Potential yield":"2025 yield",
+        `${fmtY(r.status==="candidate"?r.pot:r.yieldHist[10])} ${unitLbl()}`],
+      ["Plantable area",`${fmt(r.ha)} ha`],
+      ["Capex estimate",`${fmt(r.capex)} SAR/ha`],
+      ["Varieties",esc(r.variety)]
+    ])}</div>
+    <div class="section"><h4>Factor profile</h4><div class="bars">`+
+      top.map(t=>`<div class="brow" style="grid-template-columns:104px 1fr 56px">
+        <div class="bn">${esc(FLABEL[t.f])}</div>
+        <div class="track"><i style="width:${(t.v*100).toFixed(0)}%${t.v<0.75?";background:none;background-image:repeating-linear-gradient(135deg,var(--hatch) 0 2px,transparent 2px 5px)":""}"></i></div>
+        <div class="bv">${(t.v*100).toFixed(0)}<span style="color:var(--ink4)"> ·${(t.w/F.reduce((a,f)=>a+W[f],0)*100).toFixed(0)}%</span></div></div>`).join("")+
+    `</div><div class="note" style="margin-top:10px">Factor score out of 100, then that factor's weight.
+       Hatched bars fall outside the ideal envelope.</div></div>
+    <div class="section"><h4>Constraints</h4>`+
+      rk.map(([t,d])=>`<div class="pill" style="margin-bottom:7px">
+        <span class="ic">${markInline(t==="None material"?"strong":"marg",11)}</span>
+        <span><b style="font-weight:600">${esc(t)}.</b> ${esc(d)}</span></div>`).join("")+
+    `</div>
+    <div class="section"><div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="chip" data-act="ter">Open terroir comparison</button>
+      <button class="chip" data-act="cyc">Crop cycle for this parcel</button></div></div>`;
+  el.querySelectorAll("[data-act]").forEach(b=>b.onclick=()=>{
+    if(b.dataset.act==="ter"){ if(r.country==="SA"){S.terA=r.id;S.terB=r.analogue.id;} else S.terB=r.id; go("ter"); }
+    else { S.cycSite=r.id; S.cycRegime=r.country==="YE"?"yem":"ksa"; go("cyc"); }
+  });
+}
+["fMinScore","fElev","fWater"].forEach(id=>$(id).addEventListener("input",e=>{
+  const v=+e.target.value;
+  if(id==="fMinScore"){S.filters.score=v;$("fMinScoreV").textContent=v;}
+  if(id==="fElev"){S.filters.elev=v;$("fElevV").textContent=fmt(v)+" m";}
+  if(id==="fWater"){S.filters.water=v;$("fWaterV").textContent=v>=900?"any":fmt(v)+" mm";}
+  renderExp();}));
+$("fRegion").addEventListener("change",e=>{S.filters.region=e.target.value;renderExp();});
+$("fStatus").addEventListener("change",e=>{S.filters.status=e.target.value;renderExp();});
+$("expReset").addEventListener("click",()=>{
+  S.filters={score:0,elev:0,water:900,region:"",status:""};
+  $("fMinScore").value=0;$("fElev").value=0;$("fWater").value=900;
+  $("fRegion").value="";$("fStatus").value="";
+  $("fMinScoreV").textContent="0";$("fElevV").textContent="0 m";$("fWaterV").textContent="any";
+  renderExp();});
+$("expLayer").addEventListener("click",e=>{const b=e.target.closest("[data-layer]");if(!b)return;
+  S.expLayer=b.dataset.layer;
+  $("expLayer").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));renderExp();});
+</script>
+
+<script>
+"use strict";
+/* ---------------- 3. YEMEN BENCHMARK ---------------- */
+function renderYmn(){
+  const y=YEM(), sel=rec(byId[S.yemSel]);
+  const meanCup=y.reduce((a,r)=>a+r.cup,0)/y.length;
+  const ha=y.reduce((a,r)=>a+r.ha,0);
+  const y25=y.reduce((a,r)=>a+r.yieldHist[10]*r.ha,0)/ha;
+  const y15=y.reduce((a,r)=>a+r.yieldHist[0]*r.ha,0)/ha;
+  const best=y.slice().sort((a,b)=>b.cup-a.cup)[0];
+
+  $("ymnKpi").innerHTML=[
+    statTile("Reference districts",y.length,"belts",
+      `<span>${fmt(ha)} ha · ${fmt(y.reduce((a,r)=>a+r.holdings,0))} smallholdings</span>`),
+    statTile("Mean cup score",meanCup.toFixed(1),"SCA",
+      `<span>Top: ${esc(best.name)} at ${best.cup}</span>`),
+    statTile("Belt yield 2025",fmtY(y25),unitLbl(),
+      `<span class="d">${y25>=y15?"+":""}${((y25/y15-1)*100).toFixed(1)}%</span><span>vs 2015</span>`),
+    statTile("Mean altitude",fmt(y.reduce((a,r)=>a+r.elev,0)/y.length),"m",
+      `<span>${fmt(Math.min(...y.map(r=>r.elev)))} – ${fmt(Math.max(...y.map(r=>r.elev)))} m range</span>`)
+  ].join("");
+
+  const m=getMap("map-ymn","yem");
+  m.setLayer(S.ymnLayer); m.setSites(y); m.select(S.yemSel);
+  renderDossier($("ymnDetail"),sel);
+
+  /* yield history */
+  const beltMean=YEARS.map((_,i)=>Math.round(y.reduce((a,r)=>a+r.yieldHist[i]*r.ha,0)/ha));
+  let series;
+  if(S.ymnYieldMode==="belt") series=[{name:"Belt mean",values:beltMean.map(toUnit),area:true}];
+  else if(S.ymnYieldMode==="sel") series=[
+    {name:sel.name,values:sel.yieldHist.map(toUnit),area:true},
+    {name:"Belt mean",values:beltMean.map(toUnit)}];
+  else series=y.slice().sort((a,b)=>b.yieldHist[10]-a.yieldHist[10])
+      .map((r,i)=>({name:i<3?r.name:"",values:r.yieldHist.map(toUnit),faint:i>=3,endLabel:i<3}));
+  $("ymnYield").dataset.h=250;
+  lineChart($("ymnYield"),{labels:YEARS.map(String),series,yLabel:unitLbl(),
+    fmtV:v=>fmt(v,S.unit==="kg"?0:1)});
+  $("ymnYieldLegend").innerHTML=S.ymnYieldMode==="all"
+    ? `<span class="li">All 12 districts. The three highest 2025 yields are labelled; the rest are drawn faint.</span>`
+    : S.ymnYieldMode==="sel"
+    ? `<span class="li"><svg width="18" height="8"><path d="M0 4H18" stroke="var(--mark)" stroke-width="2"/></svg>${esc(sel.name)}</span>
+       <span class="li"><svg width="18" height="8"><path d="M0 4H18" stroke="var(--mark)" stroke-width="1.75" stroke-dasharray="5 3.5"/></svg>Belt mean</span>`
+    : `<span class="li">Area-weighted mean across all 12 districts. The 2016 – 2018 collapse is conflict, not climate: trees stayed alive, harvest and export logistics did not.</span>`;
+
+  barsH($("ymnChampions"),y.slice().sort((a,b)=>b.cup-a.cup).map(r=>({
+    id:r.id,label:r.name,value:r.cup,mark:"champ",ref:86,
+    tip:`<div class="th">${esc(r.name)}</div>
+      <div class="tr"><span>Cup score</span><b>${r.cup}</b></div>
+      <div class="tr"><span>Elevation</span><b>${fmt(r.elev)} m</b></div>
+      <div class="tr"><span>2025 yield</span><b>${fmtY(r.yieldHist[10])} ${unitLbl()}</b></div>
+      <div class="tr"><span>Varieties</span><b>${esc(r.variety)}</b></div>`})),
+    {mark:true,min:84,max:92,fmtV:v=>v.toFixed(1),onClick:selectSite,sel:S.yemSel});
+  $("ymnChampions").insertAdjacentHTML("beforeend",
+    `<div class="note" style="margin-top:12px">Tracks run 84 – 92 SCA, not from zero: every district in
+     this belt clears specialty grade, so the interesting range is the top eight points. The tick marks 86 — the specialty
+     threshold every district in this belt clears. Altitude is the strongest single predictor of cup
+     score here, but Bura'a shows fog can substitute for a few hundred metres.</div>`);
+
+  const mo=monthly(sel);
+  $("ymnClimate").innerHTML=`
+    <div class="eyebrow" style="margin-bottom:6px">Rainfall · mm</div><div id="yc1"></div>
+    <div class="eyebrow" style="margin:14px 0 6px">Mean temperature · °C</div><div id="yc2"></div>
+    <div class="eyebrow" style="margin:14px 0 6px">Sunshine · hours per day</div><div id="yc3"></div>
+    <div class="note" style="margin-top:12px">${esc(sel.name)} — two rain seasons, March–May and
+     July–September, separated by a dry June. ${sel.fog} fog days a year add roughly
+     ${fmt(sel.fog*2.2)} mm of dew interception that no rain gauge records. Each measure gets its own
+     panel and its own scale: overlaying them on one axis would invent relationships that are not there.</div>`;
+  $("yc1").dataset.h=132;
+  barsV($("yc1"),{labels:MON,series:[{name:"Rainfall",values:mo.rain}],fmtV:v=>fmt(v)+" mm"});
+  $("yc2").dataset.h=128;
+  lineChart($("yc2"),{labels:MON,series:[{name:"Mean temp",values:mo.temp,endLabel:false}],fmtV:v=>fmt(v,1)+" °C"});
+  $("yc3").dataset.h=128;
+  lineChart($("yc3"),{labels:MON,series:[{name:"Sunshine",values:mo.sunD,area:true,endLabel:false}],fmtV:v=>fmt(v,1)+" h"});
+
+  $("ymnTable").innerHTML=`<table><thead><tr>
+    <th>District</th><th>Governorate</th><th class="n">Elev m</th><th class="n">Cup</th>
+    <th class="n">2025 yield</th><th>2015–25</th><th class="n">Rain mm</th>
+    <th class="n">Score</th></tr></thead><tbody>`+
+    y.slice().sort((a,b)=>b.cup-a.cup).map(r=>`<tr data-id="${r.id}" ${S.yemSel===r.id?'aria-selected="true"':""}>
+      <td style="font-weight:500">${esc(r.name)}</td><td style="color:var(--ink3)">${esc(r.admin)}</td>
+      <td class="n num">${fmt(r.elev)}</td><td class="n num" style="font-weight:600">${r.cup}</td>
+      <td class="n num">${fmtY(r.yieldHist[10])}</td><td>${spark(r.yieldHist,64,18)}</td>
+      <td class="n num">${fmt(r.rain)}</td>
+      <td class="n num">${r.score.toFixed(1)}</td></tr>`).join("")+`</tbody></table>`;
+  $("ymnTable").querySelectorAll("tbody tr").forEach(tr=>tr.onclick=()=>selectSite(tr.dataset.id));
+}
+$("ymnLayer").addEventListener("click",e=>{const b=e.target.closest("[data-layer]");if(!b)return;
+  S.ymnLayer=b.dataset.layer;
+  $("ymnLayer").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));renderYmn();});
+$("ymnYieldMode").addEventListener("click",e=>{const b=e.target.closest("[data-m]");if(!b)return;
+  S.ymnYieldMode=b.dataset.m;
+  $("ymnYieldMode").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));renderYmn();});
+
+/* ---------------- 4. TERROIR MATCH ---------------- */
+function renderTer(){
+  const A=rec(byId[S.terA]);
+  const B=rec(byId[S.terB||A.analogue.id]);
+  $("terA").innerHTML=KSA().map(r=>`<option value="${r.id}" ${r.id===A.id?"selected":""}>${esc(r.name)} — ${esc(r.admin)}</option>`).join("");
+  $("terB").innerHTML=YEM().map(r=>`<option value="${r.id}" ${r.id===B.id?"selected":""}>${esc(r.name)} — ${esc(r.admin)}</option>`).join("");
+  const sim=similarity(A.id,B.id);
+  $("terSim").textContent=sim.toFixed(0)+"%";
+  $("terAuto").innerHTML=`${esc(A.analogue.name)} <span class="tag">${A.analogue.match.toFixed(0)}% match</span>`;
+  $("terLegA").textContent=A.name; $("terLegB").textContent=B.name;
+
+  const axes=F.map(f=>FSHORT[f]);
+  radar($("terRadar"),{axes,series:[
+    {values:F.map(f=>SUBS[A.id][f])},{values:F.map(f=>SUBS[B.id][f])}]});
+
+  const gaps=F.map(f=>({f,a:SUBS[A.id][f],b:SUBS[B.id][f],
+    ra:RAWF[A.id][f],rb:RAWF[B.id][f]})).sort((x,y)=>(x.a-x.b)-(y.a-y.b));
+  $("terGap").innerHTML=`<div class="bars">`+gaps.map(g=>{
+    const d=(g.a-g.b)*100, w=Math.abs(d)/2;
+    return `<div class="brow" data-f="${g.f}" style="grid-template-columns:118px 1fr 54px">
+      <div class="bn">${esc(FLABEL[g.f])}</div>
+      <div class="track" style="background:var(--surface2)">
+        <u style="left:50%;background:var(--line3);opacity:1"></u>
+        <i style="left:${d<0?(50-w).toFixed(1):"50"}%;right:auto;width:${w.toFixed(1)}%;
+          ${d<0?"background:none;background-image:repeating-linear-gradient(135deg,var(--hatch) 0 2px,transparent 2px 5px)":""}"></i></div>
+      <div class="bv">${d>0?"+":""}${d.toFixed(0)}</div></div>`;}).join("")+`</div>
+    <div class="note" style="margin-top:12px">Solid bars to the right of centre are factors where
+      <b style="font-weight:600">${esc(A.name)}</b> beats the reference; hatched bars to the left are the
+      deficits you would have to engineer around. Values are differences in normalised factor score,
+      not raw units.</div>`;
+  $("terGap").querySelectorAll("[data-f]").forEach(n=>{
+    const g=gaps.find(x=>x.f===n.dataset.f);
+    n.addEventListener("pointerenter",e=>tipShow(
+      `<div class="th">${esc(FLABEL[g.f])}</div>
+       <div class="tr"><span>${esc(A.name)}</span><b>${fmt(g.ra,1)} ${FUNIT[g.f]}</b></div>
+       <div class="tr"><span>${esc(B.name)}</span><b>${fmt(g.rb,1)} ${FUNIT[g.f]}</b></div>
+       <div class="tr"><span>Ideal band</span><b>${fmtS(ENV[g.f][1])} – ${fmtS(ENV[g.f][2])}</b></div>`,
+      e.clientX,e.clientY));
+    n.addEventListener("pointerleave",tipHide);
+  });
+
+  const cmp=(lab,a,b,u,d)=>`<div class="brow" style="grid-template-columns:1fr auto">
+    <div class="bn">${esc(lab)}</div>
+    <div class="bv" style="text-align:right">${fmt(a,d)}<span style="color:var(--ink4)"> / ${fmt(b,d)}</span> ${esc(u)}</div></div>`;
+  $("terWater").innerHTML=`<div class="bars">`+
+    cmp("Rainfall",A.rain,B.rain,"mm")+cmp("Fog / dew days",A.fog,B.fog,"d")+
+    cmp("Effective supply",A.eff,B.eff,"mm")+cmp("Crop demand ETc",A.etc,B.etc,"mm")+
+    cmp("Net irrigation",A.irr,B.irr,"mm")+cmp("Water security",A.waterIdx,B.waterIdx,"index")+
+    `</div><div class="meter" style="margin-top:12px"><i style="width:${clamp(A.eff/A.etc*100,0,100).toFixed(0)}%"></i></div>
+     <div class="note" style="margin-top:6px">${esc(A.name)} covers
+     <b style="font-weight:600">${(A.eff/A.etc*100).toFixed(0)}%</b> of crop water demand from rain and dew.
+     ${esc(B.name)} covers ${(B.eff/B.etc*100).toFixed(0)}%. The gap is
+     ${fmt(A.irr*10)} m³ per hectare per year that has to come out of an aquifer, a wadi or a pipe.</div>`;
+  $("terSun").innerHTML=`<div class="bars">`+
+    cmp("Sunshine",A.sun,B.sun,"h/yr")+cmp("Daily mean",A.sun/365,B.sun/365,"h/d",1)+
+    cmp("Mean temperature",A.tmean,B.tmean,"°C",1)+cmp("Diurnal range",A.diurnal,B.diurnal,"°C")+
+    cmp("Days above 32 °C",A.heat,B.heat,"d")+cmp("Frost nights",A.frost,B.frost,"n")+
+    `</div><div class="note" style="margin-top:12px">${A.sun>B.sun
+      ? `${esc(A.name)} takes ${fmt(A.sun-B.sun)} more sunshine hours a year than ${esc(B.name)}. Above roughly 3,100 h the crop needs 35 – 45 % shade cover, which is a planting decision, not a fix applied later.`
+      : `${esc(A.name)} sits under ${fmt(B.sun-A.sun)} fewer sunshine hours than ${esc(B.name)} — a slower, later ripening that usually reads as more acidity in the cup.`}</div>`;
+  $("terSoil").innerHTML=`<div class="bars">`+
+    cmp("Soil pH",A.ph,B.ph,"",1)+cmp("Root zone",A.depth,B.depth,"cm")+
+    cmp("Slope",A.slope,B.slope,"%")+cmp("Elevation",A.elev,B.elev,"m")+
+    `</div><div class="brow" style="grid-template-columns:1fr auto;margin-top:2px">
+      <div class="bn">Aspect</div><div class="bv">${esc(A.aspect)} <span style="color:var(--ink4)">/ ${esc(B.aspect)}</span></div></div>
+    <div class="note" style="margin-top:12px">${A.ph>6.8
+      ? `pH ${A.ph.toFixed(1)} is alkaline for coffee. Expect iron and zinc lock-up; budget for elemental sulphur and chelated micronutrients from year one.`
+      : `pH ${A.ph.toFixed(1)} sits inside the 5.5 – 6.6 window arabica wants — no correction programme needed.`}
+      ${A.slope>48?" Slope above 48 % means every hectare is a terrace-engineering job before it is an agronomy job.":""}</div>`;
+
+  const ma=monthly(A), mb=monthly(B);
+  $("terMonthly").innerHTML=`<div class="grid g3" style="gap:16px">
+    <div><div class="eyebrow" style="margin-bottom:8px">Rainfall · mm</div><div id="tm1"></div></div>
+    <div><div class="eyebrow" style="margin-bottom:8px">Mean temperature · °C</div><div id="tm2"></div></div>
+    <div><div class="eyebrow" style="margin-bottom:8px">Net irrigation need · mm</div><div id="tm3"></div></div></div>
+    <div class="note" style="margin-top:14px">Solid line is ${esc(A.name)}; dashed is ${esc(B.name)}.
+      Modelled from annual totals and the bimodal Sarawat rain regime — treat the shape as reliable and the
+      month-by-month level as indicative.</div>`;
+  [["tm1","rain",0],["tm2","temp",1],["tm3","irr",0]].forEach(([id,k,d])=>{
+    const el=$(id); el.dataset.h=170;
+    lineChart(el,{labels:MON,series:[
+      {name:A.name,values:ma[k],area:k!=="temp",endLabel:false},
+      {name:B.name,values:mb[k],endLabel:false}],fmtV:v=>fmt(v,d)});
+  });
+}
+$("terA").addEventListener("change",e=>{S.terA=e.target.value;S.terB=null;renderTer();});
+$("terB").addEventListener("change",e=>{S.terB=e.target.value;renderTer();});
+</script>
+
+<script>
+"use strict";
+/* ---------------- 5. CROP CYCLE ---------------- */
+function renderCyc(){
+  heatStrip($("cycPhen"),PHENOLOGY[S.cycRegime],{max:3,label:"Stage"});
+
+  $("cycSite").innerHTML=records().map(r=>
+    `<option value="${r.id}" ${r.id===S.cycSite?"selected":""}>${esc(r.name)} — ${r.country==="YE"?"Yemen":"Saudi Arabia"}</option>`).join("");
+  const s=rec(byId[S.cycSite]), mo=monthly(s);
+  $("cycIrr").dataset.h=250;
+  barsV($("cycIrr"),{labels:MON,
+    series:[{name:"Crop demand ETc",values:mo.etcM,op:.85},
+            {name:"Effective rainfall",values:mo.eff,hollow:true}],
+    yLabel:"mm",fmtV:v=>fmt(v)+" mm",
+    stackHint:(mm,iw,ih,Y,gw)=>{
+      const sx=i=>mm.l+i*gw+gw/2;
+      const p=mo.irr.map((v,i)=>[sx(i),Y(v)]);
+      return `<path d="${path(p)}" class="ser b"/>`+
+        p.map(q=>`<circle class="dot hollow" cx="${q[0].toFixed(1)}" cy="${q[1].toFixed(1)}" r="2.6"/>`).join("");
+    }});
+  const peak=mo.irr.indexOf(Math.max(...mo.irr));
+  $("cycIrr").insertAdjacentHTML("beforeend",
+    `<div class="note" style="margin-top:10px"><b style="font-weight:600">${esc(s.name)}</b> needs
+     ${fmt(mo.irr.reduce((a,b)=>a+b,0))} mm of applied water a year —
+     ${fmt(mo.irr.reduce((a,b)=>a+b,0)*10)} m³ per hectare — peaking in ${MON[peak]} at
+     ${fmt(mo.irr[peak])} mm. Rain covers demand in
+     ${mo.irr.filter(v=>v<=0).length || "no"} month${mo.irr.filter(v=>v<=0).length===1?"":"s"} of the year.</div>`);
+
+  const N=[0,10,45,35,20,40,35,25,10,0,0,0];
+  const K=[0,5,20,30,25,45,45,35,20,5,0,0];
+  const lab=[6,14,10,8,7,9,8,7,9,22,34,26];
+  heatStrip($("cycInputs"),[
+    ["Nitrogen kg/ha",N],["Potassium kg/ha",K],["Labour days/ha",lab],
+    ["Irrigation mm",mo.irr.map(v=>Math.round(v))]
+  ],{rowMax:true,fmtV:v=>fmt(v),label:"Input"});
+  $("cycInputs").insertAdjacentHTML("beforeend",
+    `<div class="note" style="margin-top:12px">Nitrogen tracks the vegetative flush and bean expansion;
+     potassium peaks with bean filling, when it drives sugar loading. Labour is dominated by the
+     three-to-five selective picking passes between October and January —
+     ${fmt(lab.reduce((a,b)=>a+b,0))} days per hectare per year in total, of which
+     ${fmt(lab[9]+lab[10]+lab[11])} fall in the harvest quarter.</div>`);
+
+  heatStrip($("cycPest"),PEST,{max:100,fmtV:v=>v,label:"Threat"});
+
+  $("cycStages").innerHTML=STAGE_NEEDS.map(([n,w,d])=>`
+    <div class="pill" style="align-items:flex-start">
+      <span class="ic" style="min-width:74px;font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;
+        text-transform:uppercase;color:var(--ink4)">${esc(w)}</span>
+      <span><b style="font-weight:600">${esc(n)}.</b> ${esc(d)}</span></div>`).join("");
+}
+$("cycRegime").addEventListener("click",e=>{const b=e.target.closest("[data-r]");if(!b)return;
+  S.cycRegime=b.dataset.r;
+  $("cycRegime").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));renderCyc();});
+$("cycSite").addEventListener("change",e=>{S.cycSite=e.target.value;renderCyc();});
+
+/* ---------------- 6. MODEL ---------------- */
+function renderMdl(rebuildSliders){
+  const tot=F.reduce((a,f)=>a+W[f],0);
+  const host=$("mdlWeights");
+  /* Rebuilding the panel mid-drag tears the slider out of the DOM and cancels the
+     gesture, so redraw the controls only when asked and patch the labels otherwise. */
+  if(rebuildSliders!==false || !host.dataset.built){
+    host.innerHTML=F.map(f=>`
+      <div class="wrow"><div class="wn">${esc(FLABEL[f])}<div class="note">${esc(FUNIT[f])} · ideal ${fmtS(ENV[f][1])} – ${fmtS(ENV[f][2])}</div></div>
+        <input type="range" data-w="${f}" min="0" max="30" step="1" value="${Math.round(W[f]*100)}"
+          aria-label="${esc(FLABEL[f])} weight">
+        <div class="wv" data-wv="${f}">${(W[f]/tot*100).toFixed(0)}%</div></div>`).join("")+
+      `<div class="divider" style="margin:10px 0"></div>
+       <div class="note">Weights are renormalised to 100% after every change, so the score always stays on the
+       same 0 – 100 scale. Terroir similarity to Yemen is deliberately <em>not</em> reweighted — it stays on the
+       fixed agronomic weighting so that "85% match to Haraz" means the same thing whatever the commercial
+       priorities of the day.</div>`;
+    host.dataset.built="1";
+    host.querySelectorAll("[data-w]").forEach(sl=>sl.addEventListener("input",e=>{
+      const f=e.target.dataset.w;
+      W[f]=+e.target.value/100;
+      if(F.reduce((a,x)=>a+W[x],0)<=0) W[f]=0.01;
+      renderMdl(false);
+    }));
+  } else {
+    host.querySelectorAll("[data-wv]").forEach(n=>
+      n.textContent=(W[n.dataset.wv]/tot*100).toFixed(0)+"%");
+  }
+
+  const rank=KSA().sort((a,b)=>b.score-a.score).slice(0,10);
+  barsH($("mdlRank"),rank.map(r=>({id:r.id,label:r.name,value:+r.score.toFixed(1),mark:r.band.mark,
+    hatch:r.status==="candidate",
+    tip:`<div class="th">${esc(r.name)}</div><div class="tr"><span>Class</span><b>${r.band.name}</b></div>
+      <div class="tr"><span>Potential</span><b>${fmtY(r.pot)} ${unitLbl()}</b></div>`})),
+    {mark:true,max:100,fmtV:v=>v.toFixed(1),onClick:id=>{selectSite(id);go("exp");}});
+  $("mdlRank").insertAdjacentHTML("beforeend",
+    `<div class="note" style="margin-top:12px">Drag any weight and watch the order change. If the ranking
+     barely moves, the recommendation is robust; if the top three reshuffle on a five-point nudge, it is
+     the weighting talking, not the terroir.</div>`);
+
+  $("mdlBands").innerHTML=BANDS.map(b=>`
+    <div class="pill" style="margin-bottom:8px">
+      <span class="ic">${markInline(b.mark,12)}</span>
+      <span><b style="font-weight:600">${b.name} — ${b.min}+.</b> ${esc(b.txt)}
+      <span class="note" style="display:block;margin-top:2px">${
+        KSA().filter(r=>band(r.score).name===b.name).length} Saudi parcels · ${
+        YEM().filter(r=>band(r.score).name===b.name).length} Yemen districts</span></span></div>`).join("");
+
+  $("mdlEnv").innerHTML=`<table><thead><tr><th>Factor</th><th class="n">Hard low</th>
+    <th class="n">Ideal</th><th class="n">Hard high</th><th class="n">Weight</th></tr></thead><tbody>`+
+    F.map(f=>`<tr style="cursor:default"><td>${esc(FLABEL[f])}<div class="note">${esc(FUNIT[f])}</div></td>
+      <td class="n num">${fmtS(ENV[f][0])}</td>
+      <td class="n num" style="font-weight:600;white-space:nowrap">${fmtS(ENV[f][1])} – ${fmtS(ENV[f][2])}</td>
+      <td class="n num">${fmtS(ENV[f][3])}</td>
+      <td class="n num">${(W[f]/tot*100).toFixed(0)}%</td></tr>`).join("")+`</tbody></table>`;
+
+  const confRows=KSA().sort((a,b)=>b.conf-a.conf).map(r=>({id:r.id,label:r.name,value:+r.conf.toFixed(0),
+    hatch:r.status==="candidate",
+    tip:`<div class="th">${esc(r.name)}</div>
+      <div class="tr"><span>Data quality</span><b>${(r.dataQ*100).toFixed(0)}%</b></div>
+      <div class="tr"><span>Analogue match</span><b>${r.analogue.match.toFixed(0)}%</b></div>
+      <div class="tr"><span>Status</span><b>${r.status}</b></div>`}));
+  barsH($("mdlConf"),confRows,{max:100,fmtV:v=>v+"%",onClick:id=>{selectSite(id);go("exp");}});
+  $("mdlConf").insertAdjacentHTML("beforeend",
+    `<div class="note" style="margin-top:12px">Confidence is 55% survey data quality, 30% strength of the
+     closest Yemen analogue, 15% whether the parcel already grows coffee. A high score with low confidence
+     is a trial plot, not a planting programme.</div>`);
+
+  $("mdlMethod").innerHTML=`
+    <div class="grid g2" style="gap:22px">
+      <div>
+        <h4 style="font-size:12.5px;margin-bottom:8px">How a score is built</h4>
+        <p class="note" style="font-size:12px;line-height:1.65">
+        Each parcel carries eleven measured or modelled factors. Every factor is scored against an
+        agronomic tolerance envelope — a trapezoid that reads 1.0 anywhere inside the ideal band and falls
+        linearly to 0 at the hard limits, so a parcel is not penalised for being merely different, only for
+        being outside what <em>Coffea arabica</em> will accept. The eleven factor scores are combined on the
+        weights above and rescaled to 0 – 100.</p>
+        <p class="note" style="font-size:12px;line-height:1.65;margin-top:10px">
+        The analogue is found separately. Each Saudi parcel and each Yemen district becomes a point in the
+        same eleven-dimensional space, min-max normalised across the whole register; match is
+        <span class="hl">100·e<sup>−2.3d</sup></span> on the weighted Euclidean distance <em>d</em>. That is
+        why a parcel can score well and still match nothing — a good envelope reached by a different route
+        is a different terroir.</p>
+      </div>
+      <div>
+        <h4 style="font-size:12.5px;margin-bottom:8px">What this model does not know</h4>
+        <p class="note" style="font-size:12px;line-height:1.65">
+        Site values here are modelled estimates assembled for demonstration, not field survey. Before any
+        planting decision each parcel needs: a season of on-site logging for temperature, humidity and
+        leaf wetness; soil pits with laboratory analysis rather than an interpolated pH; a pump test and a
+        salinity profile on the water source; and a legal check on land tenure and water rights.</p>
+        <p class="note" style="font-size:12px;line-height:1.65;margin-top:10px">
+        Nor does it price anything beyond a capex-per-hectare envelope. It does not model labour supply
+        over time, disease arrival, the reputational value of the Khawlani heritage designation, or the
+        fact that a Yemen champion's cup score reflects four centuries of variety selection that a new
+        Saudi block simply has not had.</p>
+        <div class="pill" style="margin-top:14px">
+          <span class="ic">${markInline("marg",12)}</span>
+          <span>Yemen yield history reflects conflict-period collection gaps. The 2016 – 2018 figures are
+          reconstructed from export volumes and should be read as a trend, not a measurement.</span></div>
+      </div>
+    </div>`;
+}
+$("mdlReset").addEventListener("click",()=>{Object.assign(W,DEFAULT_W);renderMdl(true);});
+
+/* ---------------- boot ---------------- */
+function render(){
+  if(S.tab==="ops") renderOps();
+  if(S.tab==="exp") renderExp();
+  if(S.tab==="ymn") renderYmn();
+  if(S.tab==="ter") renderTer();
+  if(S.tab==="cyc") renderCyc();
+  if(S.tab==="mdl") renderMdl();
+}
+$("fRegion").innerHTML=`<option value="">All regions</option>`+
+  [...new Set(SITES.filter(s=>s.country==="SA").map(s=>s.admin))].sort()
+   .map(a=>`<option value="${esc(a)}">${esc(a)}</option>`).join("");
+let rt; addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(render,180);});
+go("ops");
+</script>

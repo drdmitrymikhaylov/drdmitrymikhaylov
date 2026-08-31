@@ -4,14 +4,17 @@ Builds `Sarawat-Terroir-Engine-<ver>.dmg` from Linux — no Mac required.
 
 ## How
 
-macOS mounts more than HFS+. The image here is ISO 9660 with Rock Ridge
-extensions (which carry the POSIX permission bits and the `/Applications`
-symlink a drag-install needs), wrapped in a UDIF/UDZO container. This is the
-same route Bitcoin Core uses for its Linux-built macOS disk images, and it
-avoids needing an HFS+ kernel module the container does not have.
+`xorrisofs -hfsplus` writes a real HFS+ filesystem behind an Apple Partition
+Map — the same thing `hdiutil create` produces — with an ISO 9660 + Rock Ridge
+view alongside it. That is then wrapped in a UDIF/UDZO container. No HFS+
+kernel module is needed, which matters because the build container has none.
 
-    xorrisofs -D -l -V "<volume>" -no-pad -r -dir-mode 0755 -o out.iso dist/
+    xorrisofs -hfsplus -D -l -V "<volume>" -no-pad -r -dir-mode 0755 -o out.iso dist/
     dmg out.iso out.dmg      # libdmg-hfsplus
+
+The HFS+ catalog carries the executable bit on the launcher and writes
+`/Applications` as a genuine HFS+ symlink (`slnk`/`rhap`), which is what makes
+the drag-install work.
 
 `build_dmg.py` also writes the `.DS_Store` that gives the mounted window its
 background image, 640×400 size, 96 px icons and item positions — built with
@@ -35,6 +38,15 @@ Parses the koly trailer, decompresses every blkx chunk and checks the result is
 byte-identical to the source filesystem. It also flags a `sectorCount` that
 disagrees with the payload — libdmg-hfsplus leaves that field at zero, and
 `build_dmg.py` patches in the real value.
+
+## Gatekeeper
+
+An unsigned app is quarantined on first launch. Because that cannot be fixed
+from the build side, the image also ships `Open Sarawat directly.html` at the
+top level: the same tool as a plain file, which Gatekeeper has no reason to
+touch. The Read Me covers the Terminal `xattr` route and, for macOS 15
+Sequoia, the System Settings "Open Anyway" button that replaced the old
+right-click → Open shortcut.
 
 ## Not signed
 

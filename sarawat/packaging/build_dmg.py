@@ -79,44 +79,74 @@ shutil.copy(os.path.join(SP, "background.png"), os.path.join(DIST, ".background/
 readme = """SARAWAT TERROIR ENGINE %s
 DeepTech Engineering
 
+--------------------------------------------------------------------
+IF MACOS REFUSES TO OPEN THE APP
+--------------------------------------------------------------------
+This is expected. The app is not signed with an Apple Developer ID, so
+macOS quarantines it and reports that it is damaged, or that it cannot
+be checked for malicious software. The app is fine; it simply has no
+Apple signature, which costs a paid developer account to obtain.
+
+Three ways round it, in order of reliability.
+
+1. NO INSTALL AT ALL
+   Double-click "Open Sarawat directly.html" in this window. Same tool,
+   opens straight in your browser, nothing for Gatekeeper to block.
+   If the app is giving you trouble, just use this.
+
+2. TERMINAL - works on every macOS version
+   Drag the app to Applications first, then run:
+
+       xattr -dr com.apple.quarantine "/Applications/Sarawat Terroir Engine.app"
+
+   Then open it normally. You only ever do this once.
+
+3. SYSTEM SETTINGS
+   Double-click the app and let it be blocked. Then open
+   System Settings > Privacy & Security, scroll to Security, and press
+   "Open Anyway" next to the message about Sarawat. Confirm with Touch ID
+   or your password.
+
+   On macOS 14 Sonoma and earlier you can instead right-click (or
+   Control-click) the app and choose Open. Apple removed that shortcut in
+   macOS 15 Sequoia, so on Sequoia use "Open Anyway" or the Terminal
+   command above.
+
+--------------------------------------------------------------------
 INSTALL
-  Drag "Sarawat Terroir Engine" onto the Applications folder in this window.
+--------------------------------------------------------------------
+Drag "Sarawat Terroir Engine" onto the Applications folder in this
+window. Launching it opens the tool in your default browser. Everything
+runs locally; nothing is uploaded and no network is required.
 
-FIRST LAUNCH
-  The app is not signed with an Apple Developer ID, so macOS will refuse a
-  plain double-click the first time and say it cannot check the app for
-  malicious software.
-
-  Right-click (or Control-click) the app in Applications, choose Open, then
-  confirm Open in the dialog. macOS remembers the decision; from then on a
-  normal double-click works.
-
-  If macOS still blocks it, open Terminal and run:
-      xattr -dr com.apple.quarantine "/Applications/Sarawat Terroir Engine.app"
-
-WHAT IT DOES
-  Launching opens the tool in your default browser. Everything runs locally
-  from inside the app; nothing is uploaded and no network is required.
-
+--------------------------------------------------------------------
 MAPS
-  The relief map is drawn by the app itself and needs no network at all. To
-  swap in live Google imagery, press "Google map" on any map and paste a Maps
-  JavaScript API key.
+--------------------------------------------------------------------
+The relief map is drawn by the app itself and needs no network. To swap
+in live Google imagery, press "Google map" on any map and paste a Maps
+JavaScript API key.
 
-  A key restricted by HTTP referrer needs an http:// origin, which a file the
-  browser opened directly cannot provide. If yours is restricted, serve the
-  app instead - in Terminal:
+A key restricted by HTTP referrer needs an http:// origin, which a file
+opened directly cannot provide. If yours is restricted, serve the app
+instead - in Terminal:
 
-      cd "/Applications/Sarawat Terroir Engine.app/Contents/Resources/app"
-      python3 -m http.server 8765 --bind 127.0.0.1
+    cd "/Applications/Sarawat Terroir Engine.app/Contents/Resources/app"
+    python3 -m http.server 8765 --bind 127.0.0.1
 
-  then open http://127.0.0.1:8765/index.html and authorise that origin for
-  the key. Press Control-C in Terminal when you are finished.
+then open http://127.0.0.1:8765/index.html and authorise that origin for
+the key. Press Control-C when you are finished.
 
+--------------------------------------------------------------------
 REQUIREMENTS
-  macOS 10.13 or later, and any modern browser.
+--------------------------------------------------------------------
+macOS 10.13 or later, and any modern browser.
 """ % VER
 open(os.path.join(DIST, "Read Me.txt"), "w").write(readme)
+
+# Gatekeeper quarantines any unsigned app. A plain .html file is not an
+# executable, so it always opens - the same tool, nothing to install.
+shutil.copy(os.path.join(ROOT, "index.html"),
+            os.path.join(DIST, "Open Sarawat directly.html"))
 
 # ------------------------------------------------------------------ .DS_Store
 now = datetime.datetime(2026, 1, 1, tzinfo=datetime.timezone.utc)
@@ -141,7 +171,7 @@ icvp = {
     "scrollPositionX": 0.0, "scrollPositionY": 0.0,
 }
 bwsp = {
-    "WindowBounds": "{{240, 180}, {640, 400}}",
+    "WindowBounds": "{{220, 150}, {640, 460}}",
     "ShowStatusBar": False, "ShowToolbar": False, "ShowTabView": False,
     "ShowPathbar": False, "ShowSidebar": False, "ContainerShowSidebar": False,
     "PreviewPaneVisibility": False, "SidebarWidth": 0,
@@ -152,15 +182,18 @@ with DSStore.open(ds, "w+") as d:
     d["."]["bwsp"] = bwsp
     d["."]["vSrn"] = ("long", 1)
     d["."]["ICVO"] = ("bool", True)
-    d[APP]["Iloc"]            = (170, 170)
-    d["Applications"]["Iloc"] = (470, 170)
-    d["Read Me.txt"]["Iloc"]  = (320, 300)
-    d[".background"]["Iloc"]  = (900, 900)
+    d[APP]["Iloc"]                          = (170, 165)
+    d["Applications"]["Iloc"]               = (470, 165)
+    d["Open Sarawat directly.html"]["Iloc"] = (170, 335)
+    d["Read Me.txt"]["Iloc"]                = (470, 335)
+    d[".background"]["Iloc"]                = (900, 900)
 print("built .DS_Store (%d bytes)" % os.path.getsize(ds))
 
 # ------------------------------------------------------------------ image
 iso = os.path.join(SP, "sarawat.iso")
-subprocess.run(["xorrisofs", "-D", "-l", "-V", VOL, "-no-pad", "-r",
+# -hfsplus writes a real HFS+ filesystem alongside ISO 9660; macOS mounts the
+# HFS+ view, which is what a hand-made .dmg normally contains.
+subprocess.run(["xorrisofs", "-hfsplus", "-D", "-l", "-V", VOL, "-no-pad", "-r",
                 "-dir-mode", "0755", "-o", iso, DIST], check=True,
                stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
 print("iso %.2f MB" % (os.path.getsize(iso) / 1e6))

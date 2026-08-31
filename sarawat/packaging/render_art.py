@@ -80,5 +80,5 @@ if __name__ == "__main__":
     tokens = {"MONTSERRAT_800": fonts[("Montserrat", "800")],
               "PLEXMONO_500":   fonts[("IBM Plex Mono", "500")]}
     render("icon.html", "icon1024.png", ".i", 1024, 1024, {}, transparent=True)
-    render("bg.html",   "background.png", ".b", 640, 400, tokens)
+    render("bg.html",   "background.png", ".b", 640, 460, tokens)
     pack_icns("icon1024.png", "Sarawat.icns")
