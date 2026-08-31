@@ -45,3 +45,12 @@ cues as separate tracks.
 
 The narration is synthetic speech (Kokoro, run offline through sherpa-onnx);
 the screen capture is the live tool, not a mockup.
+
+## macOS disk image
+
+`Sarawat-Terroir-Engine-4.2.dmg` — double-click, drag the app to Applications.
+The app opens the bundled tool in your default browser; everything runs locally.
+
+It is not signed with an Apple Developer ID, so the first launch needs a
+right-click → Open rather than a double-click. See `packaging/` for how the
+image is built from Linux and how to verify it.

@@ -1777,6 +1777,13 @@ function getMap(hostId,scope){
   installMapControls(m,host);
   maps[hostId]=m; return m;
 }
+/* Safari throws on localStorage over file://, which is exactly how the packaged
+   app is opened, so every access is guarded and simply degrades to "no key". */
+const store={
+  get(k){ try{ return localStorage.getItem(k)||""; }catch(e){ return ""; } },
+  set(k,v){ try{ localStorage.setItem(k,v); return true; }catch(e){ return false; } },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+};
 function installMapControls(m,host){
   const c=document.createElement("div"); c.className="mapctl";
   c.innerHTML=`<div class="row"><button class="mbtn" data-a="in" title="Zoom in" aria-label="Zoom in">+</button>
@@ -1800,7 +1807,7 @@ function installMapControls(m,host){
     if(a==="google"){
       if(host.classList.contains("gmode")){ m.disableGoogle(); b.setAttribute("aria-pressed","false");
         b.textContent="Google map"; notice.classList.remove("on"); return; }
-      const key=localStorage.getItem("gmapsKey")||"";
+      const key=store.get("gmapsKey");
       if(!key){ askKey(m,host,notice,b); return; }
       tryGoogle(m,host,notice,b,key);
     }
@@ -1829,7 +1836,7 @@ function askKey(m,host,notice,btn){
   notice.querySelector("[data-cancel]").onclick=()=>notice.classList.remove("on");
   notice.querySelector("[data-go]").onclick=()=>{
     const k=notice.querySelector("input").value.trim(); if(!k) return;
-    localStorage.setItem("gmapsKey",k); tryGoogle(m,host,notice,btn,k);
+    store.set("gmapsKey",k); tryGoogle(m,host,notice,btn,k);
   };
 }
 function tryGoogle(m,host,notice,btn,key){
@@ -1848,7 +1855,7 @@ function tryGoogle(m,host,notice,btn,key){
         <button class="chip" data-again="1">Use a different key</button>
         <button class="chip" data-cancel="1">Dismiss</button></div>`;
     notice.querySelector("[data-cancel]").onclick=()=>notice.classList.remove("on");
-    notice.querySelector("[data-again]").onclick=()=>{localStorage.removeItem("gmapsKey");askKey(m,host,notice,btn);};
+    notice.querySelector("[data-again]").onclick=()=>{store.del("gmapsKey");askKey(m,host,notice,btn);};
   });
 }
 function selectSite(id){
