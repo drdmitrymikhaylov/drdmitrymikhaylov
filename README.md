@@ -20,11 +20,11 @@ mineral exploration, agriculture, maritime operations, satellite earth observati
 
 | Area | What I work on |
 |---|---|
-| Physics-informed neural networks | Industrial PINNs — solvers constrained by governing equations rather than data volume |
-| Mineral & subsurface exploration | Physics-aware inversion and prospectivity modelling |
-| Agriculture | Satellite and hyperspectral crop analytics; foundation models for agronomy |
-| Maritime & port operations | Underwater acoustics, surveillance, autonomous inspection |
-| Earth observation | Satellite imaging pipelines for monitoring and verification |
+| **Acoustic PINN** | Sound reaches where cameras cannot — under water, inside a machine, through a forest at night (acoustic wave equation, impedance and transmission-loss relations). |
+| **Spectral PINN** | Light carries what the eye misses: water, pigment and structure inside a leaf (radiative transfer equation, Beer–Lambert absorption). |
+| **Neuro PINN** | Electroencephalography shows the brain under real load, where movement drowns the signal (bioelectric field equations, cable equation, artefact models). |
+| **Navier PINN** | Measurements are sparse; the rock, water and air between them are not (Navier–Stokes, Navier–Cauchy, advection–diffusion). |
+| **Biochem PINN** | Yield tells you what happened, chemistry tells you why (Michaelis–Menten kinetics, binding thermodynamics, Farquhar photosynthesis). |
 
 ### Selected output
 
