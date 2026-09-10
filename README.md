@@ -4,8 +4,8 @@
 Abu Dhabi, UAE
 
 I build physics-informed AI systems that get deployed — not benchmarked and abandoned.
-My work puts physical laws inside the network: PINNs and physics-aware architectures applied to
-mineral exploration, agriculture, maritime operations, satellite earth observation, and neurotech.
+My work puts the governing equations inside the network: five families of physics-informed
+models, built around sound, light, brain signals, continuum flow and the chemistry of the cell.
 
 ---
 
