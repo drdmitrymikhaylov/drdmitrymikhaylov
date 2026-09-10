@@ -15,7 +15,6 @@ mineral exploration, agriculture, maritime operations, satellite earth observati
 - **Professor**, Kyrgyz National University
 - **AI Research Expert**, United Nations (UNODC)
 - **Co-founder & Chief Science Officer**, DeepTech Engineering
-- **Founder & CSO**, Engiscent Pte. Ltd. (Singapore)
 
 ### Research focus
 
