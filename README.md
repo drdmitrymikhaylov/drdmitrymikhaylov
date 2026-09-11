@@ -14,7 +14,7 @@ models, built around sound, light, brain signals, continuum flow and the chemist
 - **Director of Research Projects**, Abu Dhabi Maritime Academy — AD Ports Group
 - **Professor**, Kyrgyz National University
 - **AI Research Expert**, United Nations (UNODC)
-- **Co-founder & Chief Science Officer**, DeepTech Engineering
+- **Science Advisor**, Multiple startups
 
 ### Research focus
 
