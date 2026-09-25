@@ -28,9 +28,9 @@ models, built around sound, light, brain signals, continuum flow and the chemist
 
 ### Selected output
 
-- 116 publications on Google Scholar · 869 citations · h-index 13 · i10-index 15
+- 116 publications on Google Scholar · 887 citations · h-index 13 · i10-index 15
 - ~30 international patents
-- 10 books and 3 coursebooks across 4 languages
+- 8 books in 5 languages
 - Springer volume on PINNs for industrial applications (in progress)
 
 ---
