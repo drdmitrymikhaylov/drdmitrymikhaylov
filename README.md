@@ -35,6 +35,23 @@ models, built around sound, light, brain signals, continuum flow and the chemist
 
 ---
 
+### Where these repositories come from
+
+Every repository here started as real work: a paper, a field deployment, a client problem,
+often all three. The cough model goes back to the COVID-19 work published in *IEEE OJEMB*
+in 2021. The cricket-farm audio came from farms in Vietnam and Uzbekistan and was published
+in 2023. The EEG work with elite athletes stands next to a *Sensors* paper from 2024. The UAV
+spectrometer flew over hidden plantations with a United Nations agency and was published by
+Springer in 2025. The hippo warning started with a request from mining companies in Africa.
+
+I publish the repositories years after the work, once the papers are out and client
+obligations allow it. Client data stays with the clients, so each repository is rebuilt on
+open datasets, with the physics written into the model and tests that tie the numbers on
+the page to result files. Where the physics did not beat a simpler method, the README says
+so. That is how I want my work to be checked.
+
+---
+
 ### Elsewhere
 
 - LinkedIn — https://www.linkedin.com/in/dmitry-mikhaylov
