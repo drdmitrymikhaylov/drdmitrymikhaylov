@@ -52,6 +52,33 @@ so. That is how I want my work to be checked.
 
 ---
 
+### Archived on Zenodo
+
+Every repository is archived with a citable DOI. The DOI below always resolves to the latest version.
+
+| Family | Repository | DOI |
+|---|---|---|
+| Methods | [making-pinns-work](https://github.com/drdmitrymikhaylov/making-pinns-work) | [10.5281/zenodo.22342668](https://doi.org/10.5281/zenodo.22342668) |
+| Acoustic | [acousticpinn-hippo-attack-warning](https://github.com/drdmitrymikhaylov/acousticpinn-hippo-attack-warning) | [10.5281/zenodo.23529534](https://doi.org/10.5281/zenodo.23529534) |
+| Acoustic | [acousticpinn-cough-diagnosis](https://github.com/drdmitrymikhaylov/acousticpinn-cough-diagnosis) | [10.5281/zenodo.23529532](https://doi.org/10.5281/zenodo.23529532) |
+| Acoustic | [acousticpinn-biodiversity-index](https://github.com/drdmitrymikhaylov/acousticpinn-biodiversity-index) | [10.5281/zenodo.23529528](https://doi.org/10.5281/zenodo.23529528) |
+| Acoustic | [acousticpinn-beehive-queen-detection](https://github.com/drdmitrymikhaylov/acousticpinn-beehive-queen-detection) | [10.5281/zenodo.23529526](https://doi.org/10.5281/zenodo.23529526) |
+| Acoustic | [acousticpinn-insect-farm-control](https://github.com/drdmitrymikhaylov/acousticpinn-insect-farm-control) | [10.5281/zenodo.23529537](https://doi.org/10.5281/zenodo.23529537) |
+| Acoustic | [acousticpinn-machine-failure-prediction](https://github.com/drdmitrymikhaylov/acousticpinn-machine-failure-prediction) | [10.5281/zenodo.23529541](https://doi.org/10.5281/zenodo.23529541) |
+| Acoustic | [acousticpinn-poultry-health-monitoring](https://github.com/drdmitrymikhaylov/acousticpinn-poultry-health-monitoring) | [10.5281/zenodo.23529547](https://doi.org/10.5281/zenodo.23529547) |
+| Spectral | [spectralpinn-illicit-crop-detection](https://github.com/drdmitrymikhaylov/spectralpinn-illicit-crop-detection) | [10.5281/zenodo.23529573](https://doi.org/10.5281/zenodo.23529573) |
+| Spectral | [spectralpinn-crop-stress-yield](https://github.com/drdmitrymikhaylov/spectralpinn-crop-stress-yield) | [10.5281/zenodo.23529571](https://doi.org/10.5281/zenodo.23529571) |
+| Spectral | [spectralpinn-wine-grape-ripeness](https://github.com/drdmitrymikhaylov/spectralpinn-wine-grape-ripeness) | [10.5281/zenodo.23529581](https://doi.org/10.5281/zenodo.23529581) |
+| Neuro | [neuropinn-stress-focus-detection](https://github.com/drdmitrymikhaylov/neuropinn-stress-focus-detection) | [10.5281/zenodo.23529569](https://doi.org/10.5281/zenodo.23529569) |
+| Neuro | [neuropinn-stopping-adhd](https://github.com/drdmitrymikhaylov/neuropinn-stopping-adhd) | [10.5281/zenodo.23529566](https://doi.org/10.5281/zenodo.23529566) |
+| Navier | [navierpinn-mineral-ore-body-reconstruction](https://github.com/drdmitrymikhaylov/navierpinn-mineral-ore-body-reconstruction) | [10.5281/zenodo.23529559](https://doi.org/10.5281/zenodo.23529559) |
+| Navier | [navierpinn-satellite-emission-ecomonitoring](https://github.com/drdmitrymikhaylov/navierpinn-satellite-emission-ecomonitoring) | [10.5281/zenodo.23529563](https://doi.org/10.5281/zenodo.23529563) |
+| Navier | [navierpinn-lung-mri-gas-delivery](https://github.com/drdmitrymikhaylov/navierpinn-lung-mri-gas-delivery) | [10.5281/zenodo.23529555](https://doi.org/10.5281/zenodo.23529555) |
+| Navier | [navierpinn-fish-seismic-precursors](https://github.com/drdmitrymikhaylov/navierpinn-fish-seismic-precursors) | [10.5281/zenodo.23529553](https://doi.org/10.5281/zenodo.23529553) |
+| Biochem | [biochempinn-crop-photosynthesis-boost](https://github.com/drdmitrymikhaylov/biochempinn-crop-photosynthesis-boost) | [10.5281/zenodo.23529549](https://doi.org/10.5281/zenodo.23529549) |
+
+---
+
 ### Elsewhere
 
 - LinkedIn — https://www.linkedin.com/in/dmitry-mikhaylov
